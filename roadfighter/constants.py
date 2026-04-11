@@ -1,0 +1,138 @@
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+from sdl2 import (
+    SDLK_F12,
+    SDLK_LSHIFT,
+    SDLK_LEFT,
+    SDLK_RIGHT,
+    SDLK_SPACE,
+    SDLK_a,
+    SDLK_d,
+)
+
+
+PACKAGE_ROOT = Path(__file__).resolve().parent
+BUNDLE_ROOT = PACKAGE_ROOT.parent
+LEGACY_ROOT = BUNDLE_ROOT.parent
+if all((BUNDLE_ROOT / name).is_dir() for name in ("graphics", "sound", "maps", "fonts")):
+    PROJECT_ROOT = BUNDLE_ROOT
+else:
+    PROJECT_ROOT = LEGACY_ROOT
+USERDATA_DIR = Path(os.environ.get("ROADFIGHTER_USERDATA_DIR", Path.home() / ".roadfighter"))
+
+APPLICATION_NAME = "Road Fighter v1.0"
+GAMENAME = "roadfighter"
+
+SCREEN_X = 512
+SCREEN_Y = 384
+COLOUR_DEPTH = 32
+REDRAWING_PERIOD = 27
+
+QUIT_STATE = -1
+KONAMI_STATE = 0
+MENU_STATE = 1
+DEMO_STATE = 2
+PLAYING_STATE = 3
+INTERLEVEL_STATE = 4
+GAMEOVER_STATE = 5
+PRESENTATION_STATE = 6
+
+FONT_SIZE = 24
+
+SEMAPHORE_TIME = 25
+QUICK_PARTS = 256
+BIGGEST_OBJECT = 384
+
+CONSTITUTION_NONE = 1
+CONSTITUTION_SOLID = 2
+CONSTITUTION_CAR = 4
+CONSTITUTION_PLAYER = 8
+CONSTITUTION_FUEL = 16
+CONSTITUTION_WATER = 32
+CONSTITUTION_OIL = 64
+
+PLAYING_WINDOW = 384 + 64
+CAR_APPEARING_OFFSET = 384 + 32
+
+MIN_SPEED = 0
+MAX_SPEED = 24 << 8
+MAX_ACCEL_RATE = -48
+BRAKE_RATE = 16
+BRAKE_RATE_NO_FUEL = 64
+MAX_HSPEED = 768
+BOUNCE_HSPEED = 880
+MAX_FUEL = 2048
+FUEL_RECHARGE = 384
+FUEL_LOSS = 256
+
+ENEMY_SPEED = 13 << 8
+ENEMY_HSPEED = 416
+CAR_INTERVAL = 38
+
+FENEMY_SPEED = 24 << 8
+FENEMY_HSPEED = 32 * 24
+
+FADE_TIME = 25
+DEFAULT_START_DELAY = 50
+EFFECT_LENGTH = 25
+TEXT_EFFECT_LENGTH = 16
+PRESENTATION_FADE_TIME = 25
+KONAMI_FADE_TIME = 25
+INTERLEVEL_TIME = 25
+GAMEOVER_TIME = 25
+
+MAPS = [
+    "maps/level1.mg2",
+    "maps/level2.mg2",
+    "maps/level3.mg2",
+    "maps/level4.mg2",
+    "maps/level5.mg2",
+    "maps/level6.mg2",
+]
+NLEVELS = 6
+
+OBSTACLE_CHANCE = [
+    [-1, -1, 25, 20, 18, 15],
+    [50, 25, 20, 18, 15, 12],
+    [50, 25, 20, 18, 15, 12],
+    [50, 25, 20, 18, 15, 12],
+]
+
+OBSTACLE_OIL = [
+    [50, 50, 50, 50, 50, 50],
+    [50, 50, 48, 47, 45, 44],
+    [48, 47, 45, 43, 42, 40],
+    [48, 47, 45, 43, 42, 40],
+]
+
+OBSTACLE_WATER = [
+    [50, 50, 50, 50, 50, 50],
+    [50, 50, 47, 46, 45, 44],
+    [47, 46, 45, 42, 41, 40],
+    [47, 46, 45, 42, 41, 40],
+]
+
+OBSTACLE_ROCK = [
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 5, 7, 10, 12],
+    [5, 7, 10, 15, 17, 20],
+    [5, 7, 10, 15, 17, 20],
+]
+
+FASTCAR_CHANCE = [
+    [-1, -1, -1, -1, -1, -1],
+    [-1, -1, 25, 23, 20, 18],
+    [40, 37, 35, 33, 30, 25],
+    [40, 37, 35, 33, 30, 25],
+]
+
+DEFAULT_LEFT_KEY = SDLK_LEFT
+DEFAULT_RIGHT_KEY = SDLK_RIGHT
+DEFAULT_FIRE_KEY = SDLK_SPACE
+DEFAULT_LEFT2_KEY = SDLK_a
+DEFAULT_RIGHT2_KEY = SDLK_d
+DEFAULT_FIRE2_KEY = SDLK_LSHIFT
+GLOBAL_QUIT_KEY = SDLK_F12
