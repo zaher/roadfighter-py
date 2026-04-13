@@ -206,14 +206,13 @@ def Sound_resample_working_chunk(source, working_chunk, factor: float, pan: str 
     src_samples = ctypes.cast(source.contents.abuf, ctypes.POINTER(ctypes.c_int16))
     dst_samples = ctypes.cast(working_chunk.abuf, ctypes.POINTER(ctypes.c_int16))
 
-    ctypes.memset(working_chunk.abuf, 0, working_chunk.alen)
-
     for j in range(dst_frames):
-        k = int(j * factor)
-        if k >= src_frames:
-            break
-        left = src_samples[k * 2]
-        right = src_samples[k * 2 + 1]
+        k_float = (j * factor) % src_frames
+        k = int(k_float)
+        k2 = (k + 1) % src_frames
+        frac = k_float - k
+        left = int(src_samples[k * 2] * (1.0 - frac) + src_samples[k2 * 2] * frac)
+        right = int(src_samples[k * 2 + 1] * (1.0 - frac) + src_samples[k2 * 2 + 1] * frac)
         if pan == "right_only":
             dst_samples[j * 2] = 0
             dst_samples[j * 2 + 1] = (left + right) // 2
@@ -225,10 +224,8 @@ def Sound_resample_working_chunk(source, working_chunk, factor: float, pan: str 
             dst_samples[j * 2 + 1] = right
 
 
-def Sound_play_working_chunk(working_chunk, channel: int = -1) -> int:
+def Sound_play_working_chunk(working_chunk, channel: int = -1, loops: int = 0) -> int:
     if not sound_enabled or working_chunk is None:
         return -1
     chunk_ptr = ctypes.pointer(working_chunk)
-    if channel >= 0:
-        Mix_HaltChannel(channel)
-    return Mix_PlayChannel(channel, chunk_ptr, 0)
+    return Mix_PlayChannel(channel, chunk_ptr, loops)

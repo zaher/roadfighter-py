@@ -308,17 +308,13 @@ class CPlayerCarObject(CCarObject):
 
             Sound_resample_working_chunk(self.game.S_carengine, self.S_carengine_working, factor, pan)
             if self.enginesound_channel == -1:
-                self.enginesound_channel = Sound_play_working_chunk(self.S_carengine_working, -1)
-            else:
-                self.enginesound_channel = Sound_play_working_chunk(self.S_carengine_working, self.enginesound_channel)
+                self.enginesound_channel = Sound_play_working_chunk(self.S_carengine_working, -1, loops=-1)
 
             if self.state in (5, 6) and self.game.S_carskid:
                 skid_factor = 1.0 if self.state_timmer < 16 else 1.5
                 Sound_resample_working_chunk(self.game.S_carskid, self.S_carskid_working, skid_factor, "both")
                 if self.skidsound_channel == -1:
-                    self.skidsound_channel = Sound_play_working_chunk(self.S_carskid_working, -1)
-                else:
-                    self.skidsound_channel = Sound_play_working_chunk(self.S_carskid_working, self.skidsound_channel)
+                    self.skidsound_channel = Sound_play_working_chunk(self.S_carskid_working, -1, loops=-1)
             elif self.skidsound_channel != -1:
                 Sound_halt_channel(self.skidsound_channel)
                 self.skidsound_channel = -1
