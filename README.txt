@@ -1,3 +1,18 @@
+## Road Fighter ##
+
+A Game based on opensource version of (Road Fighter)[https://ecsoft2.org/road-fighter], ported to Python 3/SDL using ChatGPT by my friend (thanks for my firend for porting it)
+
+### Done ###
+
+* Full screen support
+
+### Plan ###
+
+* Upgrade to SDL3
+* Add Joystick support for 2 players
+
+### Note ###
+
 Run from this directory:
 
 python3 main.py
