@@ -1,6 +1,6 @@
 ## Road Fighter ##
 
-A Game based on opensource version of (Road Fighter)[https://ecsoft2.org/road-fighter], ported to Python 3/SDL using ChatGPT by my friend (thanks for my firend for porting it)
+A Game based on opensource version of [Road Fighter](https://ecsoft2.org/road-fighter), ported to Python 3/SDL using `gpt 5.4-high` by my friend (thanks for my firend for porting it)
 
 ### Done ###
 
