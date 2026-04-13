@@ -6,10 +6,10 @@ import sdl2
 import sdl2.sdlimage as sdlimage
 import sdl2.sdlttf as sdlttf
 
-from roadfighter import constants as const
-from roadfighter.auxiliar import GetTickCount, create_rgb_surface, pause, setupTickCount
-from roadfighter.roadfighter import RoadFighter
-from roadfighter.sound import Sound_initialization
+from source import constants as const
+from source.auxiliar import GetTickCount, create_rgb_surface, pause, setupTickCount
+from source.roadfighter import RoadFighter
+from source.sound import Sound_initialization
 
 
 def initialize_sdl(fullscreen: bool):
