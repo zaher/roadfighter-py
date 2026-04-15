@@ -4,21 +4,21 @@ from __future__ import annotations
 
 import sdl2
 
-# Virtual key codes for joystick input - use values outside standard key range
-JOY_LEFT = 0x1000
-JOY_RIGHT = 0x1001
-JOY_FIRE = 0x1002
+from .constants import JOY_LEFT, JOY_RIGHT, JOY_FIRE, JOY_UP, JOY_DOWN
 
 
 class JoystickState:
     def __init__(self) -> None:
         self._pressed = {}
         self._axis_x = 0
+        self._axis_y = 0
         self._deadzone = 8000  # Deadzone for analog stick (0-32767)
         
     def set_axis(self, axis: int, value: int) -> None:
         if axis == 0:  # X axis
             self._axis_x = value
+        elif axis == 1:  # Y axis
+            self._axis_y = value
             
     def set_button(self, button: int, pressed: bool) -> None:
         if button == 0:  # Button 0 (A/X) as fire
@@ -28,6 +28,9 @@ class JoystickState:
         # Update left/right based on axis position
         self._pressed[JOY_LEFT] = self._axis_x < -self._deadzone
         self._pressed[JOY_RIGHT] = self._axis_x > self._deadzone
+        # Update up/down based on axis position
+        self._pressed[JOY_UP] = self._axis_y < -self._deadzone
+        self._pressed[JOY_DOWN] = self._axis_y > self._deadzone
             
     def __getitem__(self, keycode: int) -> bool:
         return bool(self._pressed.get(keycode, False))

@@ -105,6 +105,8 @@ def main(argv: list[str]) -> int:
             elif event.type == sdl2.SDL_JOYAXISMOTION:
                 if event.jaxis.axis == 0:  # X axis
                     game.joystick.set_axis(0, event.jaxis.value)
+                elif event.jaxis.axis == 1:  # Y axis
+                    game.joystick.set_axis(1, event.jaxis.value)
             elif event.type == sdl2.SDL_JOYBUTTONDOWN:
                 game.joystick.set_button(event.jbutton.button, True)
             elif event.type == sdl2.SDL_JOYBUTTONUP:

@@ -16,7 +16,7 @@ from .filehandling import FileType, resolve_path
 from .game import CGame
 from .keyboard import KeyboardState
 from .joystick import JoystickState
-from .constants import JOY_LEFT, JOY_RIGHT, JOY_FIRE
+from .constants import JOY_LEFT, JOY_RIGHT, JOY_FIRE, JOY_UP, JOY_DOWN
 from .list import List
 from .sound import Sound_create_sound, Sound_release_music
 from .states.gameover_state import gameover_cycle, gameover_draw
@@ -175,6 +175,10 @@ class RoadFighter:
     def cycle(self) -> bool:
         old_state = self.state
         
+        # SAVE OLD KEYBOARD STATE FIRST - BEFORE making any changes
+        self.old_keyboard = self.keyboard.copy()
+        self.old_joystick = self.joystick.copy()
+        
         # Update joystick axis state and map to virtual keys
         self.joystick.update()
         
@@ -182,6 +186,11 @@ class RoadFighter:
         self.keyboard.set(JOY_LEFT, self.joystick[JOY_LEFT])
         self.keyboard.set(JOY_RIGHT, self.joystick[JOY_RIGHT])
         self.keyboard.set(JOY_FIRE, self.joystick[JOY_FIRE])
+        
+        # Directly set UP/DOWN keys for menu navigation
+        import sdl2
+        self.keyboard.set(sdl2.SDLK_UP, self.joystick[JOY_UP])
+        self.keyboard.set(sdl2.SDLK_DOWN, self.joystick[JOY_DOWN])
         
         if self.state == const.PRESENTATION_STATE:
             self.state = presentation_cycle(self)
