@@ -13,8 +13,17 @@ from source.sound import Sound_initialization
 
 
 def initialize_sdl(fullscreen: bool):
-    if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_AUDIO) < 0:
+    if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_AUDIO | sdl2.SDL_INIT_JOYSTICK) < 0:
         raise RuntimeError("SDL_Init failed")
+    
+    # Initialize joystick if available
+    joystick = None
+    if sdl2.SDL_NumJoysticks() > 0:
+        joystick = sdl2.SDL_JoystickOpen(0)
+        if not joystick:
+            print("Warning: Could not open joystick")
+        else:
+            print(f"Joystick initialized: {sdl2.SDL_JoystickName(joystick).decode()}")
     if sdlimage.IMG_Init(sdlimage.IMG_INIT_JPG | sdlimage.IMG_INIT_PNG) == 0:
         raise RuntimeError("IMG_Init failed")
     if sdlttf.TTF_Init() != 0:
@@ -35,7 +44,7 @@ def initialize_sdl(fullscreen: bool):
     if not window:
         raise RuntimeError("SDL_CreateWindow failed")
     surface = sdl2.SDL_GetWindowSurface(window)
-    return window, surface
+    return window, surface, joystick
 
 
 def toggle_fullscreen(window, fullscreen: bool):
@@ -69,7 +78,7 @@ def main(argv: list[str]) -> int:
                 start_level = value
         except ValueError:
             pass
-    window, window_surface = initialize_sdl(fullscreen)
+    window, window_surface, joystick = initialize_sdl(fullscreen)
     logical_surface = create_rgb_surface(const.SCREEN_X, const.SCREEN_Y)
     game = RoadFighter(start_level=start_level)
     event = sdl2.SDL_Event()
@@ -93,6 +102,13 @@ def main(argv: list[str]) -> int:
                     running = False
             elif event.type == sdl2.SDL_KEYUP:
                 game.keyboard.set(event.key.keysym.sym, False)
+            elif event.type == sdl2.SDL_JOYAXISMOTION:
+                if event.jaxis.axis == 0:  # X axis
+                    game.joystick.set_axis(0, event.jaxis.value)
+            elif event.type == sdl2.SDL_JOYBUTTONDOWN:
+                game.joystick.set_button(event.jbutton.button, True)
+            elif event.type == sdl2.SDL_JOYBUTTONUP:
+                game.joystick.set_button(event.jbutton.button, False)
 
         act_time = GetTickCount()
         if act_time - time >= const.REDRAWING_PERIOD:
@@ -102,6 +118,8 @@ def main(argv: list[str]) -> int:
             present_scaled(logical_surface, window_surface)
             sdl2.SDL_UpdateWindowSurface(window)
     game.close()
+    if joystick:
+        sdl2.SDL_JoystickClose(joystick)
     sdl2.SDL_FreeSurface(logical_surface)
     sdl2.SDL_DestroyWindow(window)
     sdlttf.TTF_Quit()

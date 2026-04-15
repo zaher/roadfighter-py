@@ -15,6 +15,8 @@ from .configuration import Configuration, default_configuration, load_configurat
 from .filehandling import FileType, resolve_path
 from .game import CGame
 from .keyboard import KeyboardState
+from .joystick import JoystickState
+from .constants import JOY_LEFT, JOY_RIGHT, JOY_FIRE
 from .list import List
 from .sound import Sound_create_sound, Sound_release_music
 from .states.gameover_state import gameover_cycle, gameover_draw
@@ -86,6 +88,15 @@ class RoadFighter:
 
         self.keyboard = KeyboardState()
         self.old_keyboard = KeyboardState()
+        self.joystick = JoystickState()
+        self.old_joystick = JoystickState()
+        
+        # Load configuration and set up joystick mapping
+        cfg = load_configuration()
+        self.keyboard.set_joystick_mapping(cfg.left_key, cfg.right_key, cfg.fire_key)
+        # Map second player joystick if supported (for now maps to player 2 keys)
+        # In future this would handle a second joystick
+        # self.keyboard.set_joystick_mapping(cfg.left2_key, cfg.right2_key, cfg.fire2_key)
         self.replay_fp = None
         self.record_replay = os.environ.get("ROADFIGHTER_RECORD_REPLAY", "").lower() in {"1", "true", "yes", "on"}
         self.load_replay = os.environ.get("ROADFIGHTER_LOAD_REPLAY", "").lower() in {"1", "true", "yes", "on"}
@@ -163,6 +174,15 @@ class RoadFighter:
 
     def cycle(self) -> bool:
         old_state = self.state
+        
+        # Update joystick axis state and map to virtual keys
+        self.joystick.update()
+        
+        # Map joystick virtual keys to keyboard state
+        self.keyboard.set(JOY_LEFT, self.joystick[JOY_LEFT])
+        self.keyboard.set(JOY_RIGHT, self.joystick[JOY_RIGHT])
+        self.keyboard.set(JOY_FIRE, self.joystick[JOY_FIRE])
+        
         if self.state == const.PRESENTATION_STATE:
             self.state = presentation_cycle(self)
         elif self.state == const.KONAMI_STATE:
@@ -184,7 +204,11 @@ class RoadFighter:
             self.state_timmer = 0
         else:
             self.state_timmer += 1
+            
+        # Save old states
         self.old_keyboard = self.keyboard.copy()
+        self.old_joystick = self.joystick.copy()
+        
         return True
 
     def close(self) -> None:
