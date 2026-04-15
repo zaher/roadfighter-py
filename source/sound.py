@@ -188,11 +188,12 @@ def Sound_make_working_chunk(source):
     if source is None:
         return None, None
     alen = source.contents.alen
-    buffer = (ctypes.c_ubyte * alen)()
+    buffer_size = int(alen * 1.26)
+    buffer = (ctypes.c_ubyte * buffer_size)()
     chunk = Mix_Chunk()
     chunk.allocated = 1
     chunk.abuf = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ubyte))
-    chunk.alen = alen
+    chunk.alen = buffer_size
     chunk.volume = MIX_MAX_VOLUME
     return chunk, buffer
 
@@ -202,7 +203,8 @@ def Sound_resample_working_chunk(source, working_chunk, factor: float, pan: str 
         return
 
     src_frames = source.contents.alen // 4
-    dst_frames = working_chunk.alen // 4
+    dst_frames = int(src_frames * factor)
+    working_chunk.alen = dst_frames * 4
     src_samples = ctypes.cast(source.contents.abuf, ctypes.POINTER(ctypes.c_int16))
     dst_samples = ctypes.cast(working_chunk.abuf, ctypes.POINTER(ctypes.c_int16))
 
