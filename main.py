@@ -11,9 +11,18 @@ from source.auxiliar import GetTickCount, create_rgb_surface, pause, setupTickCo
 from source.roadfighter import RoadFighter
 from source.sound import Sound_initialization
 
+JOYSTICK_DEADZONE = 8000
+
+
+def initialize_joystick():
+    joystick = None
+    if sdl2.SDL_NumJoysticks() > 0:
+        joystick = sdl2.SDL_JoystickOpen(0)
+    return joystick
+
 
 def initialize_sdl(fullscreen: bool):
-    if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_AUDIO) < 0:
+    if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_AUDIO | sdl2.SDL_INIT_JOYSTICK) < 0:
         raise RuntimeError("SDL_Init failed")
     if sdlimage.IMG_Init(sdlimage.IMG_INIT_JPG | sdlimage.IMG_INIT_PNG) == 0:
         raise RuntimeError("IMG_Init failed")
@@ -71,6 +80,7 @@ def main(argv: list[str]) -> int:
             pass
     window, window_surface = initialize_sdl(fullscreen)
     logical_surface = create_rgb_surface(const.SCREEN_X, const.SCREEN_Y)
+    joystick = initialize_joystick()
     game = RoadFighter(start_level=start_level)
     event = sdl2.SDL_Event()
     time = GetTickCount()
@@ -93,6 +103,25 @@ def main(argv: list[str]) -> int:
                     running = False
             elif event.type == sdl2.SDL_KEYUP:
                 game.keyboard.set(event.key.keysym.sym, False)
+            elif joystick is not None:
+                if event.type == sdl2.SDL_JOYAXISMOTION:
+                    if event.jaxis.which == 0:
+                        if event.jaxis.axis == 0:
+                            if event.jaxis.value < -JOYSTICK_DEADZONE:
+                                game.keyboard.set(const.DEFAULT_LEFT_KEY, True)
+                                game.keyboard.set(const.DEFAULT_RIGHT_KEY, False)
+                            elif event.jaxis.value > JOYSTICK_DEADZONE:
+                                game.keyboard.set(const.DEFAULT_LEFT_KEY, False)
+                                game.keyboard.set(const.DEFAULT_RIGHT_KEY, True)
+                            else:
+                                game.keyboard.set(const.DEFAULT_LEFT_KEY, False)
+                                game.keyboard.set(const.DEFAULT_RIGHT_KEY, False)
+                elif event.type == sdl2.SDL_JOYBUTTONDOWN:
+                    if event.jbutton.which == 0 and event.jbutton.button == 0:
+                        game.keyboard.set(const.DEFAULT_FIRE_KEY, True)
+                elif event.type == sdl2.SDL_JOYBUTTONUP:
+                    if event.jbutton.which == 0 and event.jbutton.button == 0:
+                        game.keyboard.set(const.DEFAULT_FIRE_KEY, False)
 
         act_time = GetTickCount()
         if act_time - time >= const.REDRAWING_PERIOD:
@@ -102,6 +131,8 @@ def main(argv: list[str]) -> int:
             present_scaled(logical_surface, window_surface)
             sdl2.SDL_UpdateWindowSurface(window)
     game.close()
+    if joystick is not None:
+        sdl2.SDL_JoystickClose(joystick)
     sdl2.SDL_FreeSurface(logical_surface)
     sdl2.SDL_DestroyWindow(window)
     sdlttf.TTF_Quit()
