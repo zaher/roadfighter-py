@@ -52,6 +52,7 @@ class KeyboardState:
     def copy(self) -> "KeyboardState":
         clone = KeyboardState()
         clone._pressed = dict(self._pressed)
+        clone._joystick_map = dict(self._joystick_map)
         return clone
 
     def newly_pressed(self, other: "KeyboardState") -> list[int]:

@@ -8,7 +8,6 @@ A Game based on opensource version of [Road Fighter](https://ecsoft2.org/road-fi
 
 ### Plan ###
 
-* Upgrade to SDL3
 * Add Joystick support for 2 players
 
 ### Note ###
