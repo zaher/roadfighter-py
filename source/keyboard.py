@@ -12,13 +12,19 @@ class KeyboardState:
             0x1002: None,  # JOY_FIRE
             0x1003: None,  # JOY_UP
             0x1004: None,  # JOY_DOWN
+            0x1010: None,  # JOY2_LEFT
+            0x1011: None,  # JOY2_RIGHT
+            0x1012: None,  # JOY2_FIRE
+            0x1013: None,  # JOY2_UP
+            0x1014: None,  # JOY2_DOWN
         }
 
-    def set_joystick_mapping(self, left_key: int, right_key: int, fire_key: int) -> None:
+    def set_joystick_mapping(self, left_key: int, right_key: int, fire_key: int, joystick_id: int = 0) -> None:
         """Set which physical keys joystick input should map to."""
-        self._joystick_map[0x1000] = left_key
-        self._joystick_map[0x1001] = right_key
-        self._joystick_map[0x1002] = fire_key
+        base = 0x1000 + (joystick_id * 0x10)
+        self._joystick_map[base] = left_key
+        self._joystick_map[base + 1] = right_key
+        self._joystick_map[base + 2] = fire_key
 
     def set(self, keycode: int, pressed: bool) -> None:
         self._pressed[keycode] = pressed

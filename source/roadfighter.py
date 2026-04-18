@@ -16,7 +16,7 @@ from .filehandling import FileType, resolve_path
 from .game import CGame
 from .keyboard import KeyboardState
 from .joystick import JoystickState
-from .constants import JOY_LEFT, JOY_RIGHT, JOY_FIRE, JOY_UP, JOY_DOWN
+from .constants import JOY_LEFT, JOY_RIGHT, JOY_FIRE, JOY_UP, JOY_DOWN, JOY2_LEFT, JOY2_RIGHT, JOY2_FIRE, JOY2_UP, JOY2_DOWN
 from .list import List
 from .sound import Sound_create_sound, Sound_release_music
 from .states.gameover_state import gameover_cycle, gameover_draw
@@ -88,15 +88,13 @@ class RoadFighter:
 
         self.keyboard = KeyboardState()
         self.old_keyboard = KeyboardState()
-        self.joystick = JoystickState()
-        self.old_joystick = JoystickState()
+        self.joystick = JoystickState(0)
+        self.joystick2 = JoystickState(1)
         
         # Load configuration and set up joystick mapping
         cfg = load_configuration()
-        self.keyboard.set_joystick_mapping(cfg.left_key, cfg.right_key, cfg.fire_key)
-        # Map second player joystick if supported (for now maps to player 2 keys)
-        # In future this would handle a second joystick
-        # self.keyboard.set_joystick_mapping(cfg.left2_key, cfg.right2_key, cfg.fire2_key)
+        self.keyboard.set_joystick_mapping(cfg.left_key, cfg.right_key, cfg.fire_key, 0)
+        self.keyboard.set_joystick_mapping(cfg.left2_key, cfg.right2_key, cfg.fire2_key, 1)
         self.replay_fp = None
         self.record_replay = os.environ.get("ROADFIGHTER_RECORD_REPLAY", "").lower() in {"1", "true", "yes", "on"}
         self.load_replay = os.environ.get("ROADFIGHTER_LOAD_REPLAY", "").lower() in {"1", "true", "yes", "on"}
@@ -177,6 +175,7 @@ class RoadFighter:
         
         # Update joystick axis state and map to virtual keys
         self.joystick.update()
+        self.joystick2.update()
         
         # Map joystick virtual keys to keyboard state
         self.keyboard.set(JOY_LEFT, self.joystick[JOY_LEFT])
@@ -184,6 +183,13 @@ class RoadFighter:
         self.keyboard.set(JOY_FIRE, self.joystick[JOY_FIRE])
         self.keyboard.set(JOY_UP, self.joystick[JOY_UP])
         self.keyboard.set(JOY_DOWN, self.joystick[JOY_DOWN])
+        
+        # Map second joystick virtual keys to keyboard state
+        self.keyboard.set(JOY2_LEFT, self.joystick2[JOY_LEFT])
+        self.keyboard.set(JOY2_RIGHT, self.joystick2[JOY_RIGHT])
+        self.keyboard.set(JOY2_FIRE, self.joystick2[JOY_FIRE])
+        self.keyboard.set(JOY2_UP, self.joystick2[JOY_UP])
+        self.keyboard.set(JOY2_DOWN, self.joystick2[JOY_DOWN])
         
         if self.state == const.PRESENTATION_STATE:
             self.state = presentation_cycle(self)
@@ -209,7 +215,6 @@ class RoadFighter:
             
         # Save old states
         self.old_keyboard = self.keyboard.copy()
-        self.old_joystick = self.joystick.copy()
         
         return True
 

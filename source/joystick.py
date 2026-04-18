@@ -8,7 +8,8 @@ from .constants import JOY_LEFT, JOY_RIGHT, JOY_FIRE, JOY_UP, JOY_DOWN
 
 
 class JoystickState:
-    def __init__(self) -> None:
+    def __init__(self, joystick_id: int = 0) -> None:
+        self.joystick_id = joystick_id
         self._pressed = {}
         self._axis_x = 0
         self._axis_y = 0
@@ -39,9 +40,10 @@ class JoystickState:
         return bool(self._pressed.get(keycode, default))
 
     def copy(self) -> "JoystickState":
-        clone = JoystickState()
+        clone = JoystickState(self.joystick_id)
         clone._pressed = dict(self._pressed)
         clone._axis_x = self._axis_x
+        clone._axis_y = self._axis_y
         clone._deadzone = self._deadzone
         return clone
 
