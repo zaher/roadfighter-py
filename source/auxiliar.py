@@ -326,29 +326,29 @@ def _transformed_bounds(width: int, height: int, hot_x: float, hot_y: float, ang
 
 
 def sge_transform(src, dest, angle_deg: float, scale_x: float, scale_y: float, hot_x: int, hot_y: int, pos_x: int, pos_y: int, _flags: int) -> None:
+    from sdl2 import sdlgfx
+    
     src_sfc = _surface_value(src)
     dest_sfc = _surface_value(dest)
     if scale_x <= 0 or scale_y <= 0:
         return
-    min_x, max_x, min_y, max_y = _transformed_bounds(src_sfc.w, src_sfc.h, hot_x, hot_y, angle_deg, scale_x, scale_y)
-    angle = math.radians(angle_deg)
-    cosine = math.cos(-angle)
-    sine = math.sin(-angle)
-    src_pixels = _pixels2d(src_sfc)
-    dest_pixels = _pixels2d(dest_sfc)
-    for dy in range(min_y, max_y):
-        for dx in range(min_x, max_x):
-            rel_x = dx
-            rel_y = dy
-            src_x = ((rel_x * cosine) - (rel_y * sine)) / scale_x + hot_x
-            src_y = ((rel_x * sine) + (rel_y * cosine)) / scale_y + hot_y
-            ix = int(round(src_x))
-            iy = int(round(src_y))
-            out_x = pos_x + dx
-            out_y = pos_y + dy
-            if 0 <= ix < src_sfc.w and 0 <= iy < src_sfc.h and 0 <= out_x < dest_sfc.w and 0 <= out_y < dest_sfc.h:
-                color = int(src_pixels[iy][ix])
-                r, g, b, a = sdl2.Uint8(), sdl2.Uint8(), sdl2.Uint8(), sdl2.Uint8()
-                sdl2.SDL_GetRGBA(color, src_sfc.format, byref(r), byref(g), byref(b), byref(a))
-                if a.value:
-                    dest_pixels[out_y][out_x] = color
+    
+    # Use SDL_gfx optimized rotozoom instead of pixel-per-pixel Python loop
+    transformed = sdlgfx.rotozoomSurfaceXY(src, angle_deg, scale_x, scale_y, sdlgfx.SMOOTHING_OFF)
+    if not transformed:
+        return
+    
+    try:
+        transformed_sfc = _surface_value(transformed)
+        dst_w = transformed_sfc.w
+        dst_h = transformed_sfc.h
+        
+        # Calculate position using bounds for backward compatibility
+        min_x, max_x, min_y, max_y = _transformed_bounds(src_sfc.w, src_sfc.h, hot_x, hot_y, angle_deg, scale_x, scale_y)
+        x = pos_x + min_x
+        y = pos_y + min_y
+        
+        rect = sdl2.SDL_Rect(int(x), int(y), dst_w, dst_h)
+        sdl2.SDL_BlitSurface(transformed, None, dest, rect)
+    finally:
+        sdl2.SDL_FreeSurface(transformed)
