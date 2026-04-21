@@ -22,7 +22,18 @@ from ..constants import (
     MIN_SPEED,
 )
 from ..object import CCarObject
-from ..sound import Sound_halt_channel, Sound_make_working_chunk, Sound_play, Sound_play_working_chunk, Sound_resample_working_chunk
+from ..sound import (
+    Sound_halt_channel,
+    Sound_make_working_chunk,
+    Sound_play,
+    Sound_play_working_chunk,
+    Sound_resample_working_chunk,
+    EngineSound_create,
+    EngineSound_delete,
+    EngineSound_play,
+    EngineSound_stop,
+    EngineSound_update,
+)
 from .explosion_object import CExplosionObject
 
 EXPLOSION_TILES = 1
@@ -51,7 +62,8 @@ class CPlayerCarObject(CCarObject):
         self.sound_timmer = 0
         self.enginesound_channel = -1
         self.skidsound_channel = -1
-        self.S_carengine_working, self._engine_buffer = Sound_make_working_chunk(self.game.S_carengine)
+        # New SDL-based continuous looping engine sound
+        self.engine_sound_player = EngineSound_create(self.game.S_carengine)
         self.S_carskid_working, self._skid_buffer = Sound_make_working_chunk(self.game.S_carskid)
         self.goal_reached = False
 
@@ -295,23 +307,29 @@ class CPlayerCarObject(CCarObject):
         return True
 
     def _update_engine_audio(self) -> None:
-        if self.state != 4 and self.y > 0 and self.fuel > 0 and self.game.S_carengine and (self.sound_timmer & 0x07) == 0:
-            factor = 0.8408964 + (1.259921 - 0.8408964) * (float(-self.y_speed) / MAX_SPEED)
-            factor = max(0.8408964, min(1.2599210, factor))
+        # Determine panning based on player count
+        if self.game.focusing_objects.Length() == 1:
+            pan = "both"
+        elif self.game.focusing_objects[0] is self:
+            pan = "right_only"
+        else:
+            pan = "left_only"
 
-            if self.game.focusing_objects.Length() == 1:
-                pan = "both"
-            elif self.game.focusing_objects[0] == self:
-                pan = "right_only"
-            else:
-                pan = "left_only"
+        # Update engine sound using SDL-based continuous looping
+        if self.state != 4 and self.y > 0 and self.fuel > 0 and self.engine_sound_player is not None:
+            speed_ratio = float(-self.y_speed) / MAX_SPEED if MAX_SPEED else 0.0
+            speed_ratio = max(0.0, min(1.0, speed_ratio))
 
-            Sound_resample_working_chunk(self.game.S_carengine, self.S_carengine_working, factor, pan)
-            if self.enginesound_channel == -1:
-                self.enginesound_channel = Sound_play_working_chunk(self.S_carengine_working, -1)
-            else:
-                self.enginesound_channel = Sound_play_working_chunk(self.S_carengine_working, self.enginesound_channel)
+            if not self.engine_sound_player.is_playing:
+                self.engine_sound_player.set_pan(pan)
+                self.engine_sound_player.update_pitch(speed_ratio)
+                self.enginesound_channel = EngineSound_play(self.engine_sound_player, speed_ratio, pan)
+            elif (self.sound_timmer & 0x07) == 0:
+                # Update pitch periodically (every 8 frames)
+                self.engine_sound_player.set_pan(pan)
+                EngineSound_update(self.engine_sound_player, speed_ratio)
 
+            # Handle skid sound
             if self.state in (5, 6) and self.game.S_carskid:
                 skid_factor = 1.0 if self.state_timmer < 16 else 1.5
                 Sound_resample_working_chunk(self.game.S_carskid, self.S_carskid_working, skid_factor, "both")
@@ -323,9 +341,9 @@ class CPlayerCarObject(CCarObject):
                 Sound_halt_channel(self.skidsound_channel)
                 self.skidsound_channel = -1
         else:
-            if self.enginesound_channel != -1:
-                Sound_halt_channel(self.enginesound_channel)
-                self.enginesound_channel = -1
+            # Stop engine sound when not driving
+            if self.engine_sound_player is not None and self.engine_sound_player.is_playing:
+                EngineSound_stop(self.engine_sound_player)
             if self.skidsound_channel != -1:
                 Sound_halt_channel(self.skidsound_channel)
                 self.skidsound_channel = -1

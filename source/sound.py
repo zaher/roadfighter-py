@@ -232,3 +232,109 @@ def Sound_play_working_chunk(working_chunk, channel: int = -1) -> int:
     if channel >= 0:
         Mix_HaltChannel(channel)
     return Mix_PlayChannel(channel, chunk_ptr, 0)
+
+
+class EngineSoundPlayer:
+    """Continuous looping engine sound with real-time pitch shifting using SDL audio."""
+
+    def __init__(self, source_sound, channel: int = -1):
+        self.source_sound = source_sound
+        self.channel = channel
+        self.working_chunk = None
+        self.buffer = None
+        self.current_factor = 1.0
+        self.is_playing = False
+        self._pan = "both"
+        if source_sound is not None:
+            self.working_chunk, self.buffer = Sound_make_working_chunk(source_sound)
+
+    def set_pan(self, pan: str) -> None:
+        """Set panning: 'both', 'left_only', or 'right_only'."""
+        self._pan = pan
+
+    def update_pitch(self, speed_ratio: float) -> None:
+        """Update pitch based on car speed ratio (0.0 to 1.0)."""
+        # Pitch shift from -1 semitone (0.8408964) to +1 semitone (1.259921)
+        factor = 0.8408964 + (1.259921 - 0.8408964) * speed_ratio
+        factor = max(0.8408964, min(1.259921, factor))
+        self.current_factor = factor
+
+    def play(self) -> int:
+        """Start playing the engine sound in a continuous loop."""
+        if not sound_enabled or self.working_chunk is None:
+            return -1
+        if self.is_playing:
+            return self.channel
+        
+        # Resample with initial factor
+        Sound_resample_working_chunk(
+            self.source_sound, self.working_chunk, self.current_factor, self._pan
+        )
+        
+        # Play on a channel with -1 loops (infinite)
+        chunk_ptr = ctypes.pointer(self.working_chunk)
+        self.channel = Mix_PlayChannel(self.channel, chunk_ptr, -1)
+        self.is_playing = self.channel >= 0
+        return self.channel
+
+    def stop(self) -> None:
+        """Stop the engine sound."""
+        if self.channel >= 0:
+            Mix_HaltChannel(self.channel)
+        self.is_playing = False
+        self.channel = -1
+
+    def refresh(self) -> None:
+        """Refresh the sound buffer with updated pitch (call periodically)."""
+        if not sound_enabled or not self.is_playing or self.working_chunk is None:
+            return
+        
+        # Resample the source with the current factor
+        Sound_resample_working_chunk(
+            self.source_sound, self.working_chunk, self.current_factor, self._pan
+        )
+        
+        # Restart playback on the same channel to apply new buffer
+        chunk_ptr = ctypes.pointer(self.working_chunk)
+        Mix_HaltChannel(self.channel)
+        self.channel = Mix_PlayChannel(self.channel, chunk_ptr, -1)
+        if self.channel < 0:
+            self.is_playing = False
+
+
+def EngineSound_create(source_sound, channel: int = -1):
+    """Create an engine sound player for continuous looping with pitch shifting."""
+    if not sound_enabled or source_sound is None:
+        return None
+    return EngineSoundPlayer(source_sound, channel)
+
+
+def EngineSound_delete(engine_player) -> None:
+    """Delete an engine sound player."""
+    if engine_player is not None:
+        engine_player.stop()
+        engine_player.working_chunk = None
+        engine_player.buffer = None
+
+
+def EngineSound_play(engine_player, speed_ratio: float = 0.0, pan: str = "both") -> int:
+    """Start playing engine sound with initial pitch based on speed ratio."""
+    if engine_player is None:
+        return -1
+    engine_player.set_pan(pan)
+    engine_player.update_pitch(speed_ratio)
+    return engine_player.play()
+
+
+def EngineSound_stop(engine_player) -> None:
+    """Stop the engine sound."""
+    if engine_player is not None:
+        engine_player.stop()
+
+
+def EngineSound_update(engine_player, speed_ratio: float) -> None:
+    """Update engine sound pitch based on current speed ratio (call each frame)."""
+    if engine_player is None or not engine_player.is_playing:
+        return
+    engine_player.update_pitch(speed_ratio)
+    engine_player.refresh()
