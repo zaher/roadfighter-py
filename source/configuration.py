@@ -65,7 +65,7 @@ def default_configuration() -> Configuration:
 
 def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
     config = configparser.ConfigParser()
-    
+
     try:
         with f1open(filename, "r", FileType.USERDATA) as handle:
             config.read_file(handle)
@@ -73,11 +73,11 @@ def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
         cfg = default_configuration()
         save_configuration(cfg, filename)
         return cfg
-    
+
     try:
         keys_section = config["Keys"]
         game_section = config["Game"]
-        
+
         def get_key(name: str) -> int:
             value = keys_section[name]
             try:
@@ -90,18 +90,19 @@ def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
                     # Fallback to default if key not recognized
                     raise ValueError(f"Unknown key name: {value}")
                 return keycode
-        
+
         return Configuration(
             left_key=get_key("left"),
             right_key=get_key("right"),
-            fire_key=get_key("fire"),
             up_key=get_key("up"),
             down_key=get_key("down"),
+            fire_key=get_key("fire"),
+
             left2_key=get_key("left2"),
             right2_key=get_key("right2"),
-            fire2_key=get_key("fire2"),
             up2_key=get_key("up2"),
             down2_key=get_key("down2"),
+            fire2_key=get_key("fire2"),
             game_remake_extras=game_section.getboolean("remake_extras"),
         )
     except (KeyError, ValueError):
@@ -112,23 +113,23 @@ def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
 
 def save_configuration(cfg: Configuration, filename: str = "RoadFighter.cfg") -> None:
     config = configparser.ConfigParser()
-    
+
     config["Keys"] = {
         "left": keycode_to_name(cfg.left_key),
         "right": keycode_to_name(cfg.right_key),
-        "fire": keycode_to_name(cfg.fire_key),
         "up": keycode_to_name(cfg.up_key),
         "down": keycode_to_name(cfg.down_key),
+        "fire": keycode_to_name(cfg.fire_key),
         "left2": keycode_to_name(cfg.left2_key),
         "right2": keycode_to_name(cfg.right2_key),
-        "fire2": keycode_to_name(cfg.fire2_key),
         "up2": keycode_to_name(cfg.up2_key),
         "down2": keycode_to_name(cfg.down2_key),
+        "fire2": keycode_to_name(cfg.fire2_key),
     }
-    
+
     config["Game"] = {
         "remake_extras": "yes" if cfg.game_remake_extras else "no",
     }
-    
+
     with f1open(filename, "w", FileType.USERDATA) as handle:
         config.write(handle)

@@ -131,12 +131,20 @@ def main(argv: list[str]) -> int:
                     game.keyboard.set_joy_button(joy_index, event.jbutton.button, False)
 
         ## Mapping keys
+        game.keyboard.trigger(const.GLOBAL_SELECT_KEY, const.JOY_SELECT)
+        game.keyboard.trigger(const.GLOBAL_SELECT_KEY, const.JOY2_SELECT)
+
         game.keyboard.trigger(game.left_key, const.JOY_LEFT)
         game.keyboard.trigger(game.right_key, const.JOY_RIGHT)
         game.keyboard.trigger(game.up_key, const.JOY_UP)
         game.keyboard.trigger(game.down_key, const.JOY_DOWN)
         game.keyboard.trigger(game.fire_key, const.JOY_FIRE)
-        game.keyboard.trigger(game.fire_key, const.JOY2_FIRE)
+
+        game.keyboard.trigger(game.left2_key, const.JOY2_LEFT)
+        game.keyboard.trigger(game.right2_key, const.JOY2_RIGHT)
+        game.keyboard.trigger(game.up2_key, const.JOY2_UP)
+        game.keyboard.trigger(game.down2_key, const.JOY2_DOWN)
+        game.keyboard.trigger(game.fire2_key, const.JOY2_FIRE)
 
         act_time = GetTickCount()
         if act_time - time >= const.REDRAWING_PERIOD:

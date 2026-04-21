@@ -61,10 +61,8 @@ def menu_cycle(roadfighter) -> int:
 
             selecting = (
                 (roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key])
-                or (roadfighter.keyboard[sdl2.SDLK_SPACE] and not roadfighter.old_keyboard[sdl2.SDLK_SPACE])
-                or (roadfighter.keyboard[roadfighter.right_key] and not roadfighter.old_keyboard[roadfighter.right_key])
-                or (roadfighter.keyboard[roadfighter.left_key] and not roadfighter.old_keyboard[roadfighter.left_key])
-                or (roadfighter.keyboard[sdl2.SDLK_ESCAPE] and not roadfighter.old_keyboard[sdl2.SDLK_ESCAPE])
+                or (roadfighter.keyboard[const.GLOBAL_SELECT_KEY] and not roadfighter.old_keyboard[const.GLOBAL_SELECT_KEY])
+                or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY])
             )
             if selecting:
                 if (roadfighter.keyboard[roadfighter.left_key] and not roadfighter.old_keyboard[roadfighter.left_key]) or (roadfighter.keyboard[sdl2.SDLK_ESCAPE] and not roadfighter.old_keyboard[sdl2.SDLK_ESCAPE]):

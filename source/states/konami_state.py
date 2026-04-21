@@ -19,7 +19,8 @@ def konami_cycle(roadfighter) -> int:
     if roadfighter.konami_state == 0 and (
         roadfighter.state_timmer >= 350
         or (roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key])
-        or (roadfighter.keyboard[sdl2.SDLK_ESCAPE] and not roadfighter.old_keyboard[sdl2.SDLK_ESCAPE])
+        or (roadfighter.keyboard[const.GLOBAL_SELECT_KEY] and not roadfighter.old_keyboard[const.GLOBAL_SELECT_KEY])
+        or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY])
     ):
         roadfighter.konami_state = 1
         if roadfighter.konami_timmer > const.KONAMI_FADE_TIME:
@@ -37,4 +38,3 @@ def konami_draw(roadfighter, screen) -> None:
     fade = float(roadfighter.konami_timmer) / float(const.KONAMI_FADE_TIME)
     if fade < 1.0:
         surface_fader(screen, max(0.0, fade), max(0.0, fade), max(0.0, fade), None)
-

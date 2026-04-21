@@ -55,11 +55,16 @@ class KeyboardState:
                 self._pressed[JOY2_DOWN] = value > JOY_deadzone
 
     def set_joy_button(self, which: int, button: int, pressed: bool) -> None:
-        if (button == 0):
             if which == 0:
-                self._pressed[JOY_FIRE] = pressed
+                if (button == 0):
+                    self._pressed[JOY_FIRE] = pressed
+                else:
+                    self._pressed[JOY_SELECT] = pressed
             else:
-                self._pressed[JOY2_FIRE] = pressed
+                if (button == 0):
+                    self._pressed[JOY2_FIRE] = pressed
+                else:
+                    self._pressed[JOY2_SELECT] = pressed
 
     def update() -> None:
         pass

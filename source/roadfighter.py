@@ -15,7 +15,7 @@ from .configuration import Configuration, default_configuration, load_configurat
 from .filehandling import FileType, resolve_path
 from .game import CGame
 from .keyboard import KeyboardState
-from .constants import JOY_LEFT, JOY_RIGHT, JOY_FIRE, JOY_UP, JOY_DOWN, JOY2_LEFT, JOY2_RIGHT, JOY2_FIRE, JOY2_UP, JOY2_DOWN
+from .constants import *
 from .list import List
 from .sound import Sound_create_sound, Sound_release_music
 from .states.gameover_state import gameover_cycle, gameover_draw
@@ -142,14 +142,15 @@ class RoadFighter:
 
         self.left_key = cfg.left_key
         self.right_key = cfg.right_key
-        self.fire_key = cfg.fire_key
         self.up_key = cfg.up_key
         self.down_key = cfg.down_key
+        self.fire_key = cfg.fire_key
         self.left2_key = cfg.left2_key
         self.right2_key = cfg.right2_key
-        self.fire2_key = cfg.fire2_key
         self.up2_key = cfg.up2_key
         self.down2_key = cfg.down2_key
+        self.fire2_key = cfg.fire2_key
+
         self.game_remake_extras = cfg.game_remake_extras
 
     def wrap_list(self, target: list):
@@ -414,14 +415,14 @@ class RoadFighter:
             Configuration(
                 left_key=self.left_key,
                 right_key=self.right_key,
-                fire_key=self.fire_key,
                 up_key=self.up_key,
                 down_key=self.down_key,
+                fire_key=self.fire_key,
                 left2_key=self.left2_key,
                 right2_key=self.right2_key,
-                fire2_key=self.fire2_key,
                 up2_key=self.up2_key,
                 down2_key=self.down2_key,
+                fire2_key=self.fire2_key,
                 game_remake_extras=self.game_remake_extras,
             )
         )

@@ -29,7 +29,8 @@ def gameover_cycle(roadfighter) -> int:
             roadfighter.state_timmer >= const.GAMEOVER_TIME
             and (
                 (roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key])
-                or (roadfighter.keyboard[sdl2.SDLK_ESCAPE] and not roadfighter.old_keyboard[sdl2.SDLK_ESCAPE])
+                or (roadfighter.keyboard[const.GLOBAL_SELECT_KEY] and not roadfighter.old_keyboard[const.GLOBAL_SELECT_KEY])
+                or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY])
             )
         )
     ):
@@ -62,4 +63,3 @@ def gameover_draw(roadfighter, screen) -> None:
     rect = roadfighter.make_rect((roadfighter.desired_scoreboard_x // 2) - (text_sfc.contents.w // 2), (roadfighter.screen_h // 2) - (text_sfc.contents.h // 2), text_sfc.contents.w, text_sfc.contents.h)
     sdl2.SDL_BlitSurface(text_sfc, None, screen, rect)
     sdl2.SDL_FreeSurface(text_sfc)
-
