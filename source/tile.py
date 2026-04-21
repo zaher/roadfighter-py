@@ -18,9 +18,27 @@ from .auxiliar import (
 )
 from .filehandling import FileType, resolve_path
 
+# Cache for shader surfaces to avoid recomputing every frame
+_shader_cache: dict[tuple[int, int, int, int, int, int], object] = {}
+_bicolor_cache: dict[tuple[int, int, int, int, int, int, int, int, int, int], object] = {}
+
 
 class CollisionMap:
+    _cache: dict[int, "CollisionMap"] = {}
+    
+    def __new__(cls, surface):
+        # Use caching based on surface pointer to avoid recomputing collision maps
+        surface_id = id(surface)
+        if surface_id in cls._cache:
+            return cls._cache[surface_id]
+        instance = super().__new__(cls)
+        cls._cache[surface_id] = instance
+        return instance
+    
     def __init__(self, surface) -> None:
+        # Skip initialization if already cached (attributes already exist)
+        if hasattr(self, 'width'):
+            return
         sfc = surface.contents if hasattr(surface, "contents") else surface
         self.width = sfc.w
         self.height = sfc.h
@@ -102,20 +120,34 @@ class CTile:
     def draw_shaded(self, x: int, y: int, dest, factor: int, red: int, green: int, blue: int, alpha: int) -> None:
         if self.orig is None:
             return
-        tmp = sdl2.SDL_ConvertSurfaceFormat(self.orig, sdl2.SDL_PIXELFORMAT_ARGB8888, 0)
-        surface_shader(tmp, float(factor) / 100.0, red, green, blue, alpha)
+        # Create cache key based on surface id and shader parameters
+        cache_key = (id(self.orig), factor, red, green, blue, alpha)
+        cached = _shader_cache.get(cache_key)
+        if cached is None:
+            cached = sdl2.SDL_ConvertSurfaceFormat(self.orig, sdl2.SDL_PIXELFORMAT_ARGB8888, 0)
+            surface_shader(cached, float(factor) / 100.0, red, green, blue, alpha)
+            # Limit cache size to prevent memory bloat
+            if len(_shader_cache) >= 100:
+                _shader_cache.clear()
+            _shader_cache[cache_key] = cached
         rect = SDL_Rect(x, y, self.r.w, self.r.h)
-        sdl2.SDL_BlitSurface(tmp, None, dest, byref(rect))
-        sdl2.SDL_FreeSurface(tmp)
+        sdl2.SDL_BlitSurface(cached, None, dest, byref(rect))
 
     def draw_bicolor(self, x: int, y: int, dest, factor: int, r1: int, g1: int, b1: int, a1: int, r2: int, g2: int, b2: int, a2: int) -> None:
         if self.orig is None:
             return
-        tmp = sdl2.SDL_ConvertSurfaceFormat(self.orig, sdl2.SDL_PIXELFORMAT_ARGB8888, 0)
-        surface_bicolor(tmp, float(factor) / 100.0, r1, g1, b1, a1, r2, g2, b2, a2)
+        # Create cache key based on surface id and shader parameters
+        cache_key = (id(self.orig), factor, r1, g1, b1, a1, r2, g2, b2, a2)
+        cached = _bicolor_cache.get(cache_key)
+        if cached is None:
+            cached = sdl2.SDL_ConvertSurfaceFormat(self.orig, sdl2.SDL_PIXELFORMAT_ARGB8888, 0)
+            surface_bicolor(cached, float(factor) / 100.0, r1, g1, b1, a1, r2, g2, b2, a2)
+            # Limit cache size to prevent memory bloat
+            if len(_bicolor_cache) >= 100:
+                _bicolor_cache.clear()
+            _bicolor_cache[cache_key] = cached
         rect = SDL_Rect(x, y, self.r.w, self.r.h)
-        sdl2.SDL_BlitSurface(tmp, None, dest, byref(rect))
-        sdl2.SDL_FreeSurface(tmp)
+        sdl2.SDL_BlitSurface(cached, None, dest, byref(rect))
 
     def clear(self) -> None:
         self.orig = None

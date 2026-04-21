@@ -110,6 +110,11 @@ def draw_rectangle(surface, x: int, y: int, w: int, h: int, pixel: int) -> None:
 
 
 def draw_line(surface, x1: int, y1: int, x2: int, y2: int, pixel: int) -> None:
+    """Draw a line using Bresenham's algorithm (optimized for software surfaces)."""
+    sfc = _surface_value(surface)
+    # Get clip rect to avoid drawing outside bounds
+    clip = _clip_rect(surface)
+    
     act_x = x1
     act_y = y1
     errterm = 0
@@ -119,9 +124,34 @@ def draw_line(surface, x1: int, y1: int, x2: int, y2: int, pixel: int) -> None:
     incx = -1 if d_x < 0 else 1
     d_x = abs(d_x)
     d_y = abs(d_y)
+    
+    # Fast path for horizontal/vertical lines
+    if d_x == 0:
+        # Vertical line
+        start_y = max(min(y1, y2), clip.y)
+        end_y = min(max(y1, y2), clip.y + clip.h - 1)
+        for y in range(start_y, end_y + 1):
+            if clip.x <= x1 < clip.x + clip.w:
+                putpixel(surface, x1, y, pixel)
+        return
+    if d_y == 0:
+        # Horizontal line
+        start_x = max(min(x1, x2), clip.x)
+        end_x = min(max(x1, x2), clip.x + clip.w - 1)
+        for x in range(start_x, end_x + 1):
+            if clip.y <= y1 < clip.y + clip.h:
+                putpixel(surface, x, y1, pixel)
+        return
+    
+    # General case - Bresenham's algorithm with clipping checks
+    pixels = _pixels2d(sfc)
+    format_ptr = sfc.format
+    
     if d_x > d_y:
         for _ in range(d_x + 1):
-            putpixel(surface, act_x, act_y, pixel)
+            if (clip.x <= act_x < clip.x + clip.w and 
+                clip.y <= act_y < clip.y + clip.h):
+                pixels[act_y][act_x] = pixel
             errterm += d_y
             if errterm >= d_x:
                 errterm -= d_x
@@ -129,7 +159,9 @@ def draw_line(surface, x1: int, y1: int, x2: int, y2: int, pixel: int) -> None:
             act_x += incx
     else:
         for _ in range(d_y + 1):
-            putpixel(surface, act_x, act_y, pixel)
+            if (clip.x <= act_x < clip.x + clip.w and 
+                clip.y <= act_y < clip.y + clip.h):
+                pixels[act_y][act_x] = pixel
             errterm += d_x
             if errterm >= d_y:
                 errterm -= d_y
