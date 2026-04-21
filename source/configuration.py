@@ -77,6 +77,6 @@ def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
 
 def save_configuration(cfg: Configuration, filename: str = "RoadFighter.cfg") -> None:
     with f1open(filename, "w", FileType.USERDATA) as handle:
-        handle.write(f"{cfg.left_key} {cfg.right_key} {cfg.fire_key}\n")
-        handle.write(f"{cfg.left2_key} {cfg.right2_key} {cfg.fire2_key}\n")
+        handle.write(f"{cfg.left_key} {cfg.right_key} {cfg.fire_key} {cfg.up_key} {cfg.down_key} ")
+        handle.write(f"{cfg.left2_key} {cfg.right2_key} {cfg.fire2_key} {cfg.up2_key} {cfg.down2_key} ")
         handle.write("1\n" if cfg.game_remake_extras else "0\n")

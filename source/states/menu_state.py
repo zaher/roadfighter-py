@@ -89,16 +89,16 @@ def menu_cycle(roadfighter) -> int:
                         roadfighter.menu_state = 3
                         roadfighter.menu_timmer = const.TEXT_EFFECT_LENGTH
                 elif roadfighter.menu_current_menu == 2:
-                    if roadfighter.menu_item in (0, 1, 2):
+                    if roadfighter.menu_item in (0, 1, 2, 3, 4):
                         roadfighter.menu_redefining_key = roadfighter.menu_item
-                    if roadfighter.menu_item == 3:
+                    if roadfighter.menu_item == 5:
                         roadfighter.menu_state = 3
                         roadfighter.menu_redefining_key = -1
                         roadfighter.menu_timmer = const.TEXT_EFFECT_LENGTH
                 elif roadfighter.menu_current_menu == 3:
-                    if roadfighter.menu_item in (0, 1, 2):
-                        roadfighter.menu_redefining_key = 3 + roadfighter.menu_item
-                    if roadfighter.menu_item == 3:
+                    if roadfighter.menu_item in (0, 1, 2, 3, 4):
+                        roadfighter.menu_redefining_key = 5 + roadfighter.menu_item
+                    if roadfighter.menu_item == 5:
                         roadfighter.menu_state = 3
                         roadfighter.menu_redefining_key = -1
                         roadfighter.menu_timmer = const.TEXT_EFFECT_LENGTH

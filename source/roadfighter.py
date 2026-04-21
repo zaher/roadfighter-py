@@ -314,18 +314,26 @@ class RoadFighter:
         sdl2.SDL_BlitSurface(sfc, None, screen, rect)
 
     def assign_redefined_key(self, key: int) -> None:
-        if self.menu_redefining_key == 0 and key not in (self.left_key, self.fire_key):
+        if self.menu_redefining_key == 0 and key not in (self.left_key, self.fire_key, self.up_key, self.down_key):
             self.right_key = key
-        elif self.menu_redefining_key == 1 and key not in (self.right_key, self.fire_key):
+        elif self.menu_redefining_key == 1 and key not in (self.right_key, self.fire_key, self.up_key, self.down_key):
             self.left_key = key
-        elif self.menu_redefining_key == 2 and key not in (self.right_key, self.left_key):
+        elif self.menu_redefining_key == 2 and key not in (self.right_key, self.left_key, self.up_key, self.down_key):
             self.fire_key = key
-        elif self.menu_redefining_key == 3 and key not in (self.left2_key, self.fire2_key):
+        elif self.menu_redefining_key == 3 and key not in (self.right_key, self.left_key, self.fire_key, self.down_key):
+            self.up_key = key
+        elif self.menu_redefining_key == 4 and key not in (self.right_key, self.left_key, self.fire_key, self.up_key):
+            self.down_key = key
+        elif self.menu_redefining_key == 5 and key not in (self.left2_key, self.fire2_key, self.up2_key, self.down2_key):
             self.right2_key = key
-        elif self.menu_redefining_key == 4 and key not in (self.right2_key, self.fire2_key):
+        elif self.menu_redefining_key == 6 and key not in (self.right2_key, self.fire2_key, self.up2_key, self.down2_key):
             self.left2_key = key
-        elif self.menu_redefining_key == 5 and key not in (self.right2_key, self.left2_key):
+        elif self.menu_redefining_key == 7 and key not in (self.right2_key, self.left2_key, self.up2_key, self.down2_key):
             self.fire2_key = key
+        elif self.menu_redefining_key == 8 and key not in (self.right2_key, self.left2_key, self.fire2_key, self.down2_key):
+            self.up2_key = key
+        elif self.menu_redefining_key == 9 and key not in (self.right2_key, self.left2_key, self.fire2_key, self.up2_key):
+            self.down2_key = key
 
     def refresh_menu_text(self, key_name_func) -> None:
         if self.menu_state not in (1, 2, 3):
@@ -404,7 +412,7 @@ class RoadFighter:
                 self.save_current_configuration()
             return const.MENU_STATE
         if self.menu_current_menu in (2, 3):
-            if self.menu_item == 3:
+            if self.menu_item == 5:
                 self.menu_state = 1
                 self.menu_timmer = 0
                 self.menu_current_menu = 1
@@ -426,9 +434,13 @@ class RoadFighter:
                 left_key=self.left_key,
                 right_key=self.right_key,
                 fire_key=self.fire_key,
+                up_key=self.up_key,
+                down_key=self.down_key,
                 left2_key=self.left2_key,
                 right2_key=self.right2_key,
                 fire2_key=self.fire2_key,
+                up2_key=self.up2_key,
+                down2_key=self.down2_key,
                 game_remake_extras=self.game_remake_extras,
             )
         )
