@@ -133,6 +133,9 @@ FASTCAR_CHANCE = [
     [40, 37, 35, 33, 30, 25],
 ]
 
+JOY_deadzone = 8000
+
+JOY_BASE = 0x1000
 # Virtual joystick key codes
 JOY_LEFT = 0x1000
 JOY_RIGHT = 0x1001

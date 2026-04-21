@@ -11,11 +11,10 @@ from source.auxiliar import GetTickCount, create_rgb_surface, pause, setupTickCo
 from source.roadfighter import RoadFighter
 from source.sound import Sound_initialization
 
-
 def initialize_sdl(fullscreen: bool):
     if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_AUDIO | sdl2.SDL_INIT_JOYSTICK) < 0:
         raise RuntimeError("SDL_Init failed")
-    
+
     # Initialize joysticks if available
     joysticks = []
     num_joysticks = sdl2.SDL_NumJoysticks()
@@ -86,6 +85,7 @@ def main(argv: list[str]) -> int:
     event = sdl2.SDL_Event()
     time = GetTickCount()
     running = True
+
     while running:
         while sdl2.SDL_PollEvent(event):
             if event.type == sdl2.SDL_QUIT:
@@ -94,6 +94,7 @@ def main(argv: list[str]) -> int:
                 window_surface = sdl2.SDL_GetWindowSurface(window)
             elif event.type == sdl2.SDL_KEYDOWN:
                 key = event.key.keysym.sym
+                ## Key Down
                 game.keyboard.set(key, True)
                 modifiers = sdl2.SDL_GetModState()
                 if key == sdl2.SDLK_RETURN and (modifiers & sdl2.KMOD_ALT):
@@ -102,29 +103,29 @@ def main(argv: list[str]) -> int:
                     fullscreen, window_surface = toggle_fullscreen(window, fullscreen)
                 if key == const.GLOBAL_QUIT_KEY:
                     running = False
+            ## Key Up
             elif event.type == sdl2.SDL_KEYUP:
                 game.keyboard.set(event.key.keysym.sym, False)
+            ## Axis
             elif event.type == sdl2.SDL_JOYAXISMOTION:
-                if event.jaxis.which == 0:  # First joystick
-                    if event.jaxis.axis == 0:  # X axis
-                        game.joystick.set_axis(0, event.jaxis.value)
-                    elif event.jaxis.axis == 1:  # Y axis
-                        game.joystick.set_axis(1, event.jaxis.value)
-                elif event.jaxis.which == 1:  # Second joystick
-                    if event.jaxis.axis == 0:  # X axis
-                        game.joystick2.set_axis(0, event.jaxis.value)
-                    elif event.jaxis.axis == 1:  # Y axis
-                        game.joystick2.set_axis(1, event.jaxis.value)
+                if event.jaxis.axis < 2 and event.jaxis.which <= len(joysticks):
+                    game.keyboard.set_joy_axis(event.jbutton.which, event.jaxis.axis, event.jaxis.value)
+            ## Joy Button Down
             elif event.type == sdl2.SDL_JOYBUTTONDOWN:
-                if event.jbutton.which == 0:  # First joystick
-                    game.joystick.set_button(event.jbutton.button, True)
-                elif event.jbutton.which == 1:  # Second joystick
-                    game.joystick2.set_button(event.jbutton.button, True)
+                if event.jbutton.which <= len(joysticks):
+                    game.keyboard.set_joy_button(event.jbutton.which, event.jbutton.button, True)
+            ## Joy Button Up
             elif event.type == sdl2.SDL_JOYBUTTONUP:
-                if event.jbutton.which == 0:  # First joystick
-                    game.joystick.set_button(event.jbutton.button, False)
-                elif event.jbutton.which == 1:  # Second joystick
-                    game.joystick2.set_button(event.jbutton.button, False)
+                if event.jbutton.which <= len(joysticks):
+                    game.keyboard.set_joy_button(event.jbutton.which, event.jbutton.button, False)
+
+        ## Mapping keys
+        game.keyboard.trigger(game.left_key, const.JOY_LEFT)
+        game.keyboard.trigger(game.right_key, const.JOY_RIGHT)
+        game.keyboard.trigger(game.up_key, const.JOY_UP)
+        game.keyboard.trigger(game.down_key, const.JOY_DOWN)
+        game.keyboard.trigger(game.fire_key, const.JOY_FIRE)
+        game.keyboard.trigger(game.fire_key, const.JOY2_FIRE)
 
         act_time = GetTickCount()
         if act_time - time >= const.REDRAWING_PERIOD:
