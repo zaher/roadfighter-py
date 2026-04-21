@@ -27,7 +27,6 @@ class CollisionMap:
     _cache: dict[int, "CollisionMap"] = {}
     
     def __new__(cls, surface):
-        # Use caching based on surface pointer to avoid recomputing collision maps
         surface_id = id(surface)
         if surface_id in cls._cache:
             return cls._cache[surface_id]
@@ -36,7 +35,6 @@ class CollisionMap:
         return instance
     
     def __init__(self, surface) -> None:
-        # Skip initialization if already cached (attributes already exist)
         if hasattr(self, 'width'):
             return
         sfc = surface.contents if hasattr(surface, "contents") else surface

@@ -507,7 +507,7 @@ class RoadFighter:
             sge_transform(self.tittle_sfc, screen, angle, factor, factor, self.tittle_sfc.contents.w // 2, self.tittle_sfc.contents.h // 2, self.tittle_sfc.contents.w // 2, self.tittle_sfc.contents.h // 2, 0)
 
     def draw_menu_text(self, screen, y_position: float) -> None:
-        glow = abs(__import__("math").sin(self.state_timmer / 10.0)) / 2.0 + 0.125
+        glow = abs(__import__("math").sin(self.state_timmer / 10.0)) * 0.5 + 0.5
         cache_key = (self.menu_tittle_text, self.menu_options_text, self.menu_nitems, self.menu_item if self.menu_state == 2 else -1, int(glow * 8), self.menu_state)
         cached = self._menu_surface_cache.get(cache_key)
         if cached is None:

@@ -321,10 +321,13 @@ def multiline_text_surface2(text: str, line_dist: int, font, c1, c2, line: int, 
     total_height = 0
     for current_line, item in enumerate(text.splitlines()):
         if current_line == line:
-            # Red color with glow intensity
-            r = int(255 * glow)
-            g = int(0)
-            b = int(0)
+            # Glow from red to bright white based on glow intensity
+            # Normalize glow from [0.125, 0.625] to [0, 1] range
+            normalized_glow = (glow - 0.125) / 0.5
+            normalized_glow = max(0.0, min(1.0, normalized_glow))
+            r = 255  # Full red always
+            g = int(255 * normalized_glow)  # Green increases with glow
+            b = int(255 * normalized_glow)  # Blue increases with glow
             color = sdl2.SDL_Color(r, g, b, 255)
         else:
             color = c1

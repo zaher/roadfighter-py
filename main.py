@@ -52,8 +52,34 @@ def initialize_sdl(fullscreen: bool):
     )
     if not window:
         raise RuntimeError("SDL_CreateWindow failed")
-    surface = sdl2.SDL_GetWindowSurface(window)
-    return window, surface, joysticks
+    
+    # Create hardware-accelerated renderer
+    renderer = sdl2.SDL_CreateRenderer(
+        window, 
+        -1, 
+        sdl2.SDL_RENDERER_ACCELERATED | sdl2.SDL_RENDERER_PRESENTVSYNC
+    )
+    if not renderer:
+        print("Warning: Failed to create accelerated renderer, falling back to software")
+        renderer = sdl2.SDL_CreateRenderer(window, -1, sdl2.SDL_RENDERER_SOFTWARE)
+        if not renderer:
+            raise RuntimeError("SDL_CreateRenderer failed")
+    
+    # Set logical size for automatic scaling
+    sdl2.SDL_RenderSetLogicalSize(renderer, const.SCREEN_X, const.SCREEN_Y)
+    
+    # Create render target texture for the game screen
+    screen_texture = sdl2.SDL_CreateTexture(
+        renderer,
+        sdl2.SDL_PIXELFORMAT_ARGB8888,
+        sdl2.SDL_TEXTUREACCESS_STREAMING,
+        const.SCREEN_X,
+        const.SCREEN_Y
+    )
+    if not screen_texture:
+        raise RuntimeError("Failed to create screen texture")
+    
+    return window, renderer, screen_texture, joysticks
 
 
 def toggle_fullscreen(window, fullscreen: bool):
@@ -62,18 +88,25 @@ def toggle_fullscreen(window, fullscreen: bool):
     if sdl2.SDL_SetWindowFullscreen(window, flags) != 0:
         raise RuntimeError("SDL_SetWindowFullscreen failed")
     sdl2.SDL_ShowCursor(sdl2.SDL_DISABLE if fullscreen else sdl2.SDL_ENABLE)
-    return fullscreen, sdl2.SDL_GetWindowSurface(window)
+    return fullscreen
 
 
-def present_scaled(logical_surface, window_surface) -> None:
-    ww = window_surface.contents.w
-    wh = window_surface.contents.h
-    scale = min(ww / const.SCREEN_X, wh / const.SCREEN_Y)
-    target_w = max(1, int(const.SCREEN_X * scale))
-    target_h = max(1, int(const.SCREEN_Y * scale))
-    dst = sdl2.SDL_Rect((ww - target_w) // 2, (wh - target_h) // 2, target_w, target_h)
-    sdl2.SDL_FillRect(window_surface, None, sdl2.SDL_MapRGB(window_surface.contents.format, 0, 0, 0))
-    sdl2.SDL_BlitScaled(logical_surface, None, window_surface, dst)
+def surface_to_texture(surface, renderer):
+    """Convert a surface to a texture for GPU rendering."""
+    texture = sdl2.SDL_CreateTextureFromSurface(renderer, surface)
+    return texture
+
+
+def present_surface(surface, renderer, screen_texture):
+    """Present a surface using the GPU renderer."""
+    # Update texture with surface pixels
+    sdl2.SDL_UpdateTexture(screen_texture, None, surface.contents.pixels, surface.contents.pitch)
+    
+    # Clear and render
+    sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255)
+    sdl2.SDL_RenderClear(renderer)
+    sdl2.SDL_RenderCopy(renderer, screen_texture, None, None)
+    sdl2.SDL_RenderPresent(renderer)
 
 
 def main(argv: list[str]) -> int:
@@ -87,8 +120,11 @@ def main(argv: list[str]) -> int:
                 start_level = value
         except ValueError:
             pass
-    window, window_surface, joysticks = initialize_sdl(fullscreen)
+    window, renderer, screen_texture, joysticks = initialize_sdl(fullscreen)
+    
+    # Create surface for software rendering (backward compatibility)
     logical_surface = create_rgb_surface(const.SCREEN_X, const.SCREEN_Y)
+    
     game = RoadFighter(start_level=start_level)
     event = sdl2.SDL_Event()
     time = GetTickCount()
@@ -99,16 +135,16 @@ def main(argv: list[str]) -> int:
             if event.type == sdl2.SDL_QUIT:
                 running = False
             elif event.type == sdl2.SDL_WINDOWEVENT and event.window.event == sdl2.SDL_WINDOWEVENT_SIZE_CHANGED:
-                window_surface = sdl2.SDL_GetWindowSurface(window)
+                pass  # Renderer handles scaling automatically
             elif event.type == sdl2.SDL_KEYDOWN:
                 key = event.key.keysym.sym
                 ## Key Down
                 game.keyboard.set(key, True)
                 modifiers = sdl2.SDL_GetModState()
                 if key == sdl2.SDLK_RETURN and (modifiers & sdl2.KMOD_ALT):
-                    fullscreen, window_surface = toggle_fullscreen(window, fullscreen)
+                    fullscreen = toggle_fullscreen(window, fullscreen)
                 elif sys.platform == "darwin" and key == sdl2.SDLK_f and (modifiers & sdl2.KMOD_GUI):
-                    fullscreen, window_surface = toggle_fullscreen(window, fullscreen)
+                    fullscreen = toggle_fullscreen(window, fullscreen)
                 if key == const.GLOBAL_QUIT_KEY:
                     running = False
             ## Key Up
@@ -134,14 +170,19 @@ def main(argv: list[str]) -> int:
         if act_time - time >= const.REDRAWING_PERIOD:
             time = act_time
             running = running and game.cycle()
+            
+            # Draw to surface (backward compatible)
             game.draw(logical_surface)
-            present_scaled(logical_surface, window_surface)
-            sdl2.SDL_UpdateWindowSurface(window)
+            
+            # Present via GPU
+            present_surface(logical_surface, renderer, screen_texture)
+            
     game.close()
     for joystick, instance_id in joysticks:
         if joystick:
             sdl2.SDL_JoystickClose(joystick)
-    sdl2.SDL_FreeSurface(logical_surface)
+    sdl2.SDL_DestroyTexture(screen_texture)
+    sdl2.SDL_DestroyRenderer(renderer)
     sdl2.SDL_DestroyWindow(window)
     sdlttf.TTF_Quit()
     sdl2.SDL_Quit()
