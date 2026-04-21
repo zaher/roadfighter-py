@@ -90,11 +90,9 @@ class RoadFighter:
         self.old_keyboard = KeyboardState()
         self.joystick = JoystickState(0)
         self.joystick2 = JoystickState(1)
-        
+
         # Load configuration and set up joystick mapping
         cfg = load_configuration()
-        self.keyboard.set_joystick_mapping(cfg.left_key, cfg.right_key, cfg.fire_key, 0)
-        self.keyboard.set_joystick_mapping(cfg.left2_key, cfg.right2_key, cfg.fire2_key, 1)
         self.replay_fp = None
         self.record_replay = os.environ.get("ROADFIGHTER_RECORD_REPLAY", "").lower() in {"1", "true", "yes", "on"}
         self.load_replay = os.environ.get("ROADFIGHTER_LOAD_REPLAY", "").lower() in {"1", "true", "yes", "on"}
@@ -146,9 +144,13 @@ class RoadFighter:
         self.left_key = cfg.left_key
         self.right_key = cfg.right_key
         self.fire_key = cfg.fire_key
+        self.up_key = cfg.up_key
+        self.down_key = cfg.down_key
         self.left2_key = cfg.left2_key
         self.right2_key = cfg.right2_key
         self.fire2_key = cfg.fire2_key
+        self.up2_key = cfg.up2_key
+        self.down2_key = cfg.down2_key
         self.game_remake_extras = cfg.game_remake_extras
 
     def wrap_list(self, target: list):
@@ -172,25 +174,25 @@ class RoadFighter:
 
     def cycle(self) -> bool:
         old_state = self.state
-        
+
         # Update joystick axis state and map to virtual keys
         self.joystick.update()
         self.joystick2.update()
-        
+
         # Map joystick virtual keys to keyboard state
-        self.keyboard.set(JOY_LEFT, self.joystick[JOY_LEFT])
-        self.keyboard.set(JOY_RIGHT, self.joystick[JOY_RIGHT])
-        self.keyboard.set(JOY_FIRE, self.joystick[JOY_FIRE])
-        self.keyboard.set(JOY_UP, self.joystick[JOY_UP])
-        self.keyboard.set(JOY_DOWN, self.joystick[JOY_DOWN])
-        
+        self.keyboard.trigger(self.left_key, self.joystick[JOY_LEFT])
+        self.keyboard.trigger(self.right_key, self.joystick[JOY_RIGHT])
+        self.keyboard.trigger(self.fire_key, self.joystick[JOY_FIRE])
+        self.keyboard.trigger(self.up_key, self.joystick[JOY_UP])
+        self.keyboard.trigger(self.down_key, self.joystick[JOY_DOWN])
+
         # Map second joystick virtual keys to keyboard state
-        self.keyboard.set(JOY2_LEFT, self.joystick2[JOY_LEFT])
-        self.keyboard.set(JOY2_RIGHT, self.joystick2[JOY_RIGHT])
-        self.keyboard.set(JOY2_FIRE, self.joystick2[JOY_FIRE])
-        self.keyboard.set(JOY2_UP, self.joystick2[JOY_UP])
-        self.keyboard.set(JOY2_DOWN, self.joystick2[JOY_DOWN])
-        
+        self.keyboard.trigger(self.left2_key, self.joystick2[JOY_LEFT])
+        self.keyboard.trigger(self.right2_key, self.joystick2[JOY_RIGHT])
+        self.keyboard.trigger(self.fire2_key, self.joystick2[JOY_FIRE])
+        self.keyboard.trigger(self.up2_key, self.joystick2[JOY_UP])
+        self.keyboard.trigger(self.down2_key, self.joystick2[JOY_DOWN])
+
         if self.state == const.PRESENTATION_STATE:
             self.state = presentation_cycle(self)
         elif self.state == const.KONAMI_STATE:
@@ -212,10 +214,10 @@ class RoadFighter:
             self.state_timmer = 0
         else:
             self.state_timmer += 1
-            
+
         # Save old states
         self.old_keyboard = self.keyboard.copy()
-        
+
         return True
 
     def close(self) -> None:
@@ -342,19 +344,23 @@ class RoadFighter:
             self.menu_options_text = (
                 f"RIGHT : {'' if self.menu_redefining_key == 0 else key_name_func(self.right_key)}\n"
                 f"LEFT : {'' if self.menu_redefining_key == 1 else key_name_func(self.left_key)}\n"
+                f"UP : {'' if self.menu_redefining_key == 3 else key_name_func(self.up_key)}\n"
+                f"DOWN : {'' if self.menu_redefining_key == 4 else key_name_func(self.down_key)}\n"
                 f"FIRE : {'' if self.menu_redefining_key == 2 else key_name_func(self.fire_key)}\n"
                 "BACK\n"
             )
-            self.menu_nitems = 4
+            self.menu_nitems = 6
         elif self.menu_current_menu == 3:
             self.menu_tittle_text = "PLAYER 2:"
             self.menu_options_text = (
-                f"RIGHT : {'' if self.menu_redefining_key == 3 else key_name_func(self.right2_key)}\n"
-                f"LEFT : {'' if self.menu_redefining_key == 4 else key_name_func(self.left2_key)}\n"
-                f"FIRE : {'' if self.menu_redefining_key == 5 else key_name_func(self.fire2_key)}\n"
+                f"RIGHT : {'' if self.menu_redefining_key == 5 else key_name_func(self.right2_key)}\n"
+                f"LEFT : {'' if self.menu_redefining_key == 6 else key_name_func(self.left2_key)}\n"
+                f"UP : {'' if self.menu_redefining_key == 8 else key_name_func(self.up2_key)}\n"
+                f"DOWN : {'' if self.menu_redefining_key == 9 else key_name_func(self.down2_key)}\n"
+                f"FIRE : {'' if self.menu_redefining_key == 7 else key_name_func(self.fire2_key)}\n"
                 "BACK\n"
             )
-            self.menu_nitems = 4
+            self.menu_nitems = 6
         elif self.menu_current_menu == 4:
             self.menu_tittle_text = "ONE PLAYER:"
             self.menu_options_text = "LEVEL A\nLEVEL B\nLEVEL C\nBACK\n"
