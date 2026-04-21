@@ -288,7 +288,14 @@ def multiline_text_surface2(text: str, line_dist: int, font, c1, c2, line: int, 
     max_width = 0
     total_height = 0
     for current_line, item in enumerate(text.splitlines()):
-        color = c2 if current_line == line else c1
+        if current_line == line:
+            # Red color with glow intensity
+            r = int(255 * glow)
+            g = int(0)
+            b = int(0)
+            color = sdl2.SDL_Color(r, g, b, 255)
+        else:
+            color = c1
         surface = TTF_RenderText_Blended(font, item.encode("utf-8"), color)
         rendered.append((current_line, surface))
         max_width = max(max_width, surface.contents.w)
