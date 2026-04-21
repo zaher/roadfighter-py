@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import configparser
 from dataclasses import dataclass
+import sdl2
 
 from .constants import (
     DEFAULT_FIRE_KEY,
@@ -16,6 +17,19 @@ from .constants import (
     DEFAULT_DOWN2_KEY,
 )
 from .filehandling import FileType, f1open
+
+
+def keycode_to_name(keycode: int) -> str:
+    """Convert SDL keycode to human-readable string name."""
+    name = sdl2.SDL_GetKeyName(keycode)
+    if isinstance(name, bytes):
+        return name.decode("utf-8", "ignore")
+    return str(name)
+
+
+def name_to_keycode(name: str) -> int:
+    """Convert human-readable key name to SDL keycode."""
+    return sdl2.SDL_GetKeyFromName(name.encode("utf-8"))
 
 
 @dataclass
@@ -64,17 +78,30 @@ def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
         keys_section = config["Keys"]
         game_section = config["Game"]
         
+        def get_key(name: str) -> int:
+            value = keys_section[name]
+            try:
+                # Handle old numeric format for backwards compatibility
+                return int(value)
+            except ValueError:
+                # New string format
+                keycode = name_to_keycode(value)
+                if keycode == sdl2.SDLK_UNKNOWN:
+                    # Fallback to default if key not recognized
+                    raise ValueError(f"Unknown key name: {value}")
+                return keycode
+        
         return Configuration(
-            left_key=int(keys_section["left"]),
-            right_key=int(keys_section["right"]),
-            fire_key=int(keys_section["fire"]),
-            up_key=int(keys_section["up"]),
-            down_key=int(keys_section["down"]),
-            left2_key=int(keys_section["left2"]),
-            right2_key=int(keys_section["right2"]),
-            fire2_key=int(keys_section["fire2"]),
-            up2_key=int(keys_section["up2"]),
-            down2_key=int(keys_section["down2"]),
+            left_key=get_key("left"),
+            right_key=get_key("right"),
+            fire_key=get_key("fire"),
+            up_key=get_key("up"),
+            down_key=get_key("down"),
+            left2_key=get_key("left2"),
+            right2_key=get_key("right2"),
+            fire2_key=get_key("fire2"),
+            up2_key=get_key("up2"),
+            down2_key=get_key("down2"),
             game_remake_extras=game_section.getboolean("remake_extras"),
         )
     except (KeyError, ValueError):
@@ -87,16 +114,16 @@ def save_configuration(cfg: Configuration, filename: str = "RoadFighter.cfg") ->
     config = configparser.ConfigParser()
     
     config["Keys"] = {
-        "left": str(cfg.left_key),
-        "right": str(cfg.right_key),
-        "fire": str(cfg.fire_key),
-        "up": str(cfg.up_key),
-        "down": str(cfg.down_key),
-        "left2": str(cfg.left2_key),
-        "right2": str(cfg.right2_key),
-        "fire2": str(cfg.fire2_key),
-        "up2": str(cfg.up2_key),
-        "down2": str(cfg.down2_key),
+        "left": keycode_to_name(cfg.left_key),
+        "right": keycode_to_name(cfg.right_key),
+        "fire": keycode_to_name(cfg.fire_key),
+        "up": keycode_to_name(cfg.up_key),
+        "down": keycode_to_name(cfg.down_key),
+        "left2": keycode_to_name(cfg.left2_key),
+        "right2": keycode_to_name(cfg.right2_key),
+        "fire2": keycode_to_name(cfg.fire2_key),
+        "up2": keycode_to_name(cfg.up2_key),
+        "down2": keycode_to_name(cfg.down2_key),
     }
     
     config["Game"] = {
