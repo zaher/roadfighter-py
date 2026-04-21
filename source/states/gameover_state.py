@@ -4,7 +4,7 @@ import sdl2
 
 from .. import constants as const
 from ..auxiliar import surface_fader
-from ..sound import Sound_create_music, Sound_music_volume, Sound_release_music
+from ..sound import Sound_create_music, Sound_music_volume, Sound_release_music, EngineSound_stop
 
 
 def gameover_cycle(roadfighter) -> int:
@@ -13,6 +13,11 @@ def gameover_cycle(roadfighter) -> int:
         roadfighter.gameover_timmer = 0
         Sound_music_volume(128)
         Sound_create_music("sound/gameover", 0)
+        # Stop any playing car engine sounds
+        if roadfighter.game is not None:
+            for obj in roadfighter.game.focusing_objects:
+                if hasattr(obj, 'engine_sound_player') and obj.engine_sound_player is not None:
+                    EngineSound_stop(obj.engine_sound_player)
 
     if roadfighter.gameover_state == 1:
         volume = (roadfighter.gameover_timmer * 128) // const.GAMEOVER_TIME

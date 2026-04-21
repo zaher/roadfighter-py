@@ -1,2 +1,10 @@
-pysdl2
-pysdl2-dll
+# Road Fighter - Python/SDL2 Game Requirements
+
+# PySDL2 - Python bindings for SDL2
+# Provides: sdl2 core (video, audio, joystick, events)
+pysdl2>=0.9.12
+
+# PySDL2-DLL - SDL2 libraries for Windows
+# Provides: SDL2, SDL2_image, SDL2_mixer, SDL2_ttf binaries
+# Used for: image loading (IMG_Load), sound (Mix_PlayMusic), fonts (TTF_Init)
+pysdl2-dll>=2.26.0
