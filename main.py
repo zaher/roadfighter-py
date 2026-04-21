@@ -11,20 +11,28 @@ from source.auxiliar import GetTickCount, create_rgb_surface, pause, setupTickCo
 from source.roadfighter import RoadFighter
 from source.sound import Sound_initialization
 
+def get_joystick_index(instance_id: int, joysticks: list) -> int:
+    """Find joystick index by SDL instance ID (uses cached IDs)"""
+    for idx, (joystick, cached_id) in enumerate(joysticks):
+        if joystick and cached_id == instance_id:
+            return idx
+    return -1
+
 def initialize_sdl(fullscreen: bool):
     if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_AUDIO | sdl2.SDL_INIT_JOYSTICK) < 0:
         raise RuntimeError("SDL_Init failed")
 
     # Initialize joysticks if available
-    joysticks = []
+    joysticks = []  # Stores tuples of (joystick_pointer, instance_id)
     num_joysticks = sdl2.SDL_NumJoysticks()
     for i in range(min(num_joysticks, 2)):  # Support up to 2 joysticks
         joystick = sdl2.SDL_JoystickOpen(i)
         if not joystick:
             print(f"Warning: Could not open joystick {i}")
         else:
-            print(f"Joystick {i} initialized: {sdl2.SDL_JoystickName(joystick).decode()}")
-            joysticks.append(joystick)
+            instance_id = sdl2.SDL_JoystickInstanceID(joystick)
+            print(f"Joystick {i} initialized: {sdl2.SDL_JoystickName(joystick).decode()} (ID: {instance_id})")
+            joysticks.append((joystick, instance_id))
     if sdlimage.IMG_Init(sdlimage.IMG_INIT_JPG | sdlimage.IMG_INIT_PNG) == 0:
         raise RuntimeError("IMG_Init failed")
     if sdlttf.TTF_Init() != 0:
@@ -108,16 +116,19 @@ def main(argv: list[str]) -> int:
                 game.keyboard.set(event.key.keysym.sym, False)
             ## Axis
             elif event.type == sdl2.SDL_JOYAXISMOTION:
-                if event.jaxis.axis < 2 and event.jaxis.which <= len(joysticks):
-                    game.keyboard.set_joy_axis(event.jbutton.which, event.jaxis.axis, event.jaxis.value)
+                joy_index = get_joystick_index(event.jaxis.which, joysticks)
+                if event.jaxis.axis < 2 and joy_index >= 0:
+                    game.keyboard.set_joy_axis(joy_index, event.jaxis.axis, event.jaxis.value)
             ## Joy Button Down
             elif event.type == sdl2.SDL_JOYBUTTONDOWN:
-                if event.jbutton.which <= len(joysticks):
-                    game.keyboard.set_joy_button(event.jbutton.which, event.jbutton.button, True)
+                joy_index = get_joystick_index(event.jbutton.which, joysticks)
+                if joy_index >= 0:
+                    game.keyboard.set_joy_button(joy_index, event.jbutton.button, True)
             ## Joy Button Up
             elif event.type == sdl2.SDL_JOYBUTTONUP:
-                if event.jbutton.which <= len(joysticks):
-                    game.keyboard.set_joy_button(event.jbutton.which, event.jbutton.button, False)
+                joy_index = get_joystick_index(event.jbutton.which, joysticks)
+                if joy_index >= 0:
+                    game.keyboard.set_joy_button(joy_index, event.jbutton.button, False)
 
         ## Mapping keys
         game.keyboard.trigger(game.left_key, const.JOY_LEFT)
@@ -135,7 +146,7 @@ def main(argv: list[str]) -> int:
             present_scaled(logical_surface, window_surface)
             sdl2.SDL_UpdateWindowSurface(window)
     game.close()
-    for joystick in joysticks:
+    for joystick, instance_id in joysticks:
         if joystick:
             sdl2.SDL_JoystickClose(joystick)
     sdl2.SDL_FreeSurface(logical_surface)
