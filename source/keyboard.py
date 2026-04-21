@@ -7,26 +7,49 @@ class KeyboardState:
     def __init__(self) -> None:
         self._pressed = {}
         self._keys = {}
+        self._joy_mapping: dict[int, list[int]] = {}
+
+    def set_joy_mapping(self, mapping: dict[int, list[int]]) -> None:
+        """Set the joystick-to-keyboard mapping.
+        
+        Args:
+            mapping: Dictionary mapping keyboard keycodes to lists of joystick keycodes.
+                    When a keyboard key is checked, its mapped joystick keys are also checked.
+        """
+        self._joy_mapping = mapping
 
     def set(self, keycode: int, pressed: bool) -> None:
         self._keys[keycode] = pressed
-        self._pressed[keycode] = pressed ## TODO map it
+        self._pressed[keycode] = pressed
 
     def __getitem__(self, keycode: int) -> bool:
-        return bool(self._pressed.get(keycode, False))
+        # Check if the key is directly pressed
+        if self._pressed.get(keycode, False):
+            return True
+        # Check if any mapped joystick key is pressed
+        joy_keys = self._joy_mapping.get(keycode)
+        if joy_keys:
+            for joy_key in joy_keys:
+                if self._pressed.get(joy_key, False):
+                    return True
+        return False
 
     def get(self, keycode: int, default: bool = False) -> bool:
         # Check physical key first
-        physical_pressed = bool(self._pressed.get(keycode, default))
-        return physical_pressed
-
-    def trigger(self, keycode, alt: int) -> None:
-        if bool(self._pressed.get(alt, False)):
-            self._pressed[keycode] = True
+        if self._pressed.get(keycode, False):
+            return True
+        # Check if any mapped joystick key is pressed
+        joy_keys = self._joy_mapping.get(keycode)
+        if joy_keys:
+            for joy_key in joy_keys:
+                if self._pressed.get(joy_key, False):
+                    return True
+        return default
 
     def copy(self) -> "KeyboardState":
         clone = KeyboardState()
         clone._pressed = dict(self._pressed)
+        clone._joy_mapping = dict(self._joy_mapping)
         return clone
 
     def newly_pressed(self, other: "KeyboardState") -> list[int]:

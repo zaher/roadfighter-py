@@ -153,8 +153,28 @@ class RoadFighter:
 
         self.game_remake_extras = cfg.game_remake_extras
 
+        # Initialize joystick mapping
+        self.update_joystick_mapping()
+
     def wrap_list(self, target: list):
         return ListWrapper(target)
+
+    def update_joystick_mapping(self) -> None:
+        """Update the joystick-to-keyboard mapping based on current key configuration."""
+        mapping = {
+            const.GLOBAL_SELECT_KEY: [const.JOY_SELECT, const.JOY2_SELECT],
+            self.left_key: [const.JOY_LEFT],
+            self.right_key: [const.JOY_RIGHT],
+            self.up_key: [const.JOY_UP],
+            self.down_key: [const.JOY_DOWN],
+            self.fire_key: [const.JOY_FIRE],
+            self.left2_key: [const.JOY2_LEFT],
+            self.right2_key: [const.JOY2_RIGHT],
+            self.up2_key: [const.JOY2_UP],
+            self.down2_key: [const.JOY2_DOWN],
+            self.fire2_key: [const.JOY2_FIRE],
+        }
+        self.keyboard.set_joy_mapping(mapping)
 
     def make_rect(self, x: int, y: int, w: int, h: int):
         return sdl2.SDL_Rect(x, y, w, h)
@@ -296,26 +316,41 @@ class RoadFighter:
         sdl2.SDL_BlitSurface(sfc, None, screen, rect)
 
     def assign_redefined_key(self, key: int) -> None:
+        key_changed = False
         if self.menu_redefining_key == 0 and key not in (self.left_key, self.fire_key, self.up_key, self.down_key):
             self.right_key = key
+            key_changed = True
         elif self.menu_redefining_key == 1 and key not in (self.right_key, self.fire_key, self.up_key, self.down_key):
             self.left_key = key
+            key_changed = True
         elif self.menu_redefining_key == 2 and key not in (self.right_key, self.left_key, self.up_key, self.down_key):
             self.fire_key = key
+            key_changed = True
         elif self.menu_redefining_key == 3 and key not in (self.right_key, self.left_key, self.fire_key, self.down_key):
             self.up_key = key
+            key_changed = True
         elif self.menu_redefining_key == 4 and key not in (self.right_key, self.left_key, self.fire_key, self.up_key):
             self.down_key = key
+            key_changed = True
         elif self.menu_redefining_key == 5 and key not in (self.left2_key, self.fire2_key, self.up2_key, self.down2_key):
             self.right2_key = key
+            key_changed = True
         elif self.menu_redefining_key == 6 and key not in (self.right2_key, self.fire2_key, self.up2_key, self.down2_key):
             self.left2_key = key
+            key_changed = True
         elif self.menu_redefining_key == 7 and key not in (self.right2_key, self.left2_key, self.up2_key, self.down2_key):
             self.fire2_key = key
+            key_changed = True
         elif self.menu_redefining_key == 8 and key not in (self.right2_key, self.left2_key, self.fire2_key, self.down2_key):
             self.up2_key = key
+            key_changed = True
         elif self.menu_redefining_key == 9 and key not in (self.right2_key, self.left2_key, self.fire2_key, self.up2_key):
             self.down2_key = key
+            key_changed = True
+        
+        # Update joystick mapping if keys were changed
+        if key_changed:
+            self.update_joystick_mapping()
 
     def refresh_menu_text(self, key_name_func) -> None:
         if self.menu_state not in (1, 2, 3):
