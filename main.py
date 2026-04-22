@@ -9,6 +9,7 @@ import sdl2.sdlttf as sdlttf
 
 from source import constants as const
 from source.auxiliar import GetTickCount, create_rgb_surface, pause, setupTickCount
+from source.debug import debug_print, set_debug
 from source.roadfighter import RoadFighter
 from source.sound import Sound_initialization
 
@@ -19,7 +20,7 @@ def get_joystick_index(instance_id: int, joysticks: list) -> int:
             return idx
     return -1
 
-def initialize_sdl(fullscreen: bool):
+def initialize_sdl(fullscreen: bool, debug: bool = False):
     if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_AUDIO | sdl2.SDL_INIT_JOYSTICK) < 0:
         raise RuntimeError("SDL_Init failed")
 
@@ -29,10 +30,10 @@ def initialize_sdl(fullscreen: bool):
     for i in range(min(num_joysticks, 2)):  # Support up to 2 joysticks
         joystick = sdl2.SDL_JoystickOpen(i)
         if not joystick:
-            print(f"Warning: Could not open joystick {i}")
+            debug_print(f"Warning: Could not open joystick {i}")
         else:
             instance_id = sdl2.SDL_JoystickInstanceID(joystick)
-            print(f"Joystick {i} initialized: {sdl2.SDL_JoystickName(joystick).decode()} (ID: {instance_id})")
+            debug_print(f"Joystick {i} initialized: {sdl2.SDL_JoystickName(joystick).decode()} (ID: {instance_id})")
             joysticks.append((joystick, instance_id))
     if sdlimage.IMG_Init(sdlimage.IMG_INIT_JPG | sdlimage.IMG_INIT_PNG) == 0:
         raise RuntimeError("IMG_Init failed")
@@ -61,7 +62,7 @@ def initialize_sdl(fullscreen: bool):
         sdl2.SDL_RENDERER_ACCELERATED | sdl2.SDL_RENDERER_PRESENTVSYNC
     )
     if not renderer:
-        print("Warning: Failed to create accelerated renderer, falling back to software")
+        debug_print("Warning: Failed to create accelerated renderer, falling back to software")
         renderer = sdl2.SDL_CreateRenderer(window, -1, sdl2.SDL_RENDERER_SOFTWARE)
         if not renderer:
             raise RuntimeError("SDL_CreateRenderer failed")
@@ -154,8 +155,14 @@ def main(argv: list[str]) -> int:
         help="Load and play back a previously recorded replay from replay.txt. "
              "The game will run automatically using the recorded inputs."
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug output for SDL and joystick initialization messages."
+    )
 
     args = parser.parse_args(argv[1:])
+    set_debug(args.debug)
 
     fullscreen = False
     start_level = args.start_level
@@ -163,7 +170,7 @@ def main(argv: list[str]) -> int:
     record_replay = args.record_replay
     load_replay = args.load_replay
     
-    window, renderer, screen_texture, joysticks = initialize_sdl(fullscreen)
+    window, renderer, screen_texture, joysticks = initialize_sdl(fullscreen, args.debug)
     
     # Create surface for software rendering (backward compatibility)
     logical_surface = create_rgb_surface(const.SCREEN_X, const.SCREEN_Y)
