@@ -34,9 +34,9 @@ def interlevel_cycle(roadfighter) -> int:
             if roadfighter.game_mode >= 3:
                 roadfighter.game_mode = 3
 
-        scoreboard_name = "graphics/s_board12p.bmp" if roadfighter.n_players > 1 else "graphics/s_board11p.bmp"
+        scoreboard_name = "graphics/s_board12p.png" if roadfighter.n_players > 1 else "graphics/s_board11p.png"
         if roadfighter.current_level >= 6:
-            scoreboard_name = "graphics/s_board22p.bmp" if roadfighter.n_players > 1 else "graphics/s_board21p.bmp"
+            scoreboard_name = "graphics/s_board22p.png" if roadfighter.n_players > 1 else "graphics/s_board21p.png"
         if roadfighter.scoreboard2_sfc is not None:
             sdl2.SDL_FreeSurface(roadfighter.scoreboard2_sfc)
         roadfighter.scoreboard2_sfc = sdlimage.IMG_Load(str(resolve_path(scoreboard_name, FileType.GAMEDATA)).encode("utf-8"))
