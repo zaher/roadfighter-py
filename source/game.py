@@ -13,7 +13,7 @@ from sdl2.sdlmixer import MIX_MAX_VOLUME
 from sdl2.sdlttf import TTF_CloseFont, TTF_OpenFont
 
 from . import constants as const
-from .auxiliar import draw_line, sdl2 as _unused_sdl2, surface_fader
+from .auxiliar import create_rgb_surface, draw_line, sdl2 as _unused_sdl2, surface_fader
 from .constants import (
     BIGGEST_OBJECT,
     CAR_APPEARING_OFFSET,
@@ -136,6 +136,9 @@ class CGame:
         self.middleground = List[CObject]()
         self.foreground = List[CObject]()
         self.tyre_marks = List[CTyreMark]()
+        self.tyre_marks_surface = None
+        self.tyre_marks_surface_dirty = True
+        self._tyre_marks_count = 0
 
         self.quick_background = [List[CObject]() for _ in range(QUICK_PARTS)]
         self.quick_middleground = [List[CObject]() for _ in range(QUICK_PARTS)]
@@ -211,6 +214,7 @@ class CGame:
             "obstacles_sfc",
             "pause_sfc",
             "explosion_sfc",
+            "tyre_marks_surface",
         ):
             surface = getattr(self, surface_name)
             if surface is not None:
@@ -399,7 +403,9 @@ class CGame:
     def create_tyre_mark(self, x: int, y: int, x2: int, y2: int) -> Optional[CTyreMark]:
         if y == y2:
             return None
-        return CTyreMark(x, y, x2, y2)
+        mark = CTyreMark(x, y, x2, y2)
+        self.tyre_marks_surface_dirty = True
+        return mark
 
     def load_map(self, mapname: str) -> bool:
         scanner = TokenScanner(resolve_path(mapname, FileType.GAMEDATA).read_text())
@@ -682,10 +688,23 @@ class CGame:
             for obj in self.quick_middleground[i]:
                 obj.draw(sx, sy, surface)
 
-        if self.game_remake_extras:
-            for tyre_mark in self.tyre_marks:
-                draw_line(surface, tyre_mark.x - sx, tyre_mark.y - sy, tyre_mark.x2 - sx, tyre_mark.y2 - sy, 0)
-                draw_line(surface, tyre_mark.x + 1 - sx, tyre_mark.y - sy, tyre_mark.x2 + 1 - sx, tyre_mark.y2 - sy, 0)
+        if self.game_remake_extras and self.tyre_marks.Length() > 0:
+            # Use cached tyre marks surface for better performance
+            current_count = self.tyre_marks.Length()
+            if self.tyre_marks_surface_dirty or self.tyre_marks_surface is None or current_count != self._tyre_marks_count:
+                # Rebuild cached surface when tyre marks change
+                if self.tyre_marks_surface is not None:
+                    sdl2.SDL_FreeSurface(self.tyre_marks_surface)
+                self.tyre_marks_surface = create_rgb_surface(self.dx, self.dy)
+                sdl2.SDL_SetSurfaceBlendMode(self.tyre_marks_surface, sdl2.SDL_BLENDMODE_BLEND)
+                for tyre_mark in self.tyre_marks:
+                    draw_line(self.tyre_marks_surface, tyre_mark.x, tyre_mark.y, tyre_mark.x2, tyre_mark.y2, 0xFF000000)
+                    draw_line(self.tyre_marks_surface, tyre_mark.x + 1, tyre_mark.y, tyre_mark.x2 + 1, tyre_mark.y2, 0xFF000000)
+                self.tyre_marks_surface_dirty = False
+                self._tyre_marks_count = current_count
+            # Blit cached surface
+            rect = SDL_Rect(-sx, -sy, self.dx, self.dy)
+            sdl2.SDL_BlitSurface(self.tyre_marks_surface, None, surface, byref(rect))
 
         for obj in self.objects:
             obj.draw(sx, sy, surface)

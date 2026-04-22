@@ -38,6 +38,23 @@ from .explosion_object import CExplosionObject
 
 EXPLOSION_TILES = 1
 
+# Pre-computed tyre coordinates for all 8 car angles (0-7)
+# Each entry contains: (x1, y1, x2, y2) for left and right tyres
+_TYRE_COORDS_TABLE = [
+    (6, 7, 21, 7),    # 0° - straight
+    (16, 3, 27, 12),  # 45°
+    (23, 8, 23, 22),  # 90°
+    (27, 16, 16, 25), # 135°
+    (21, 25, 6, 25),  # 180° - upside down
+    (5, 25, 16, 16),  # 225°
+    (8, 22, 8, 8),    # 270°
+    (5, 12, 16, 3),   # 315°
+]
+
+# Pre-computed car tile lookup for angles 0-359
+_CAR_TILE_CACHE = {}
+_NTILES_MINUS_EXPLOSION = 8  # Will be set properly in __init__
+
 
 class CPlayerCarObject(CCarObject):
     def __init__(self, x: int, y: int, tiles, first_tile: int, last_tile: int, lk: int, rk: int, fk: int, score: int, init_delay: int, game):
@@ -379,31 +396,32 @@ class CPlayerCarObject(CCarObject):
             )
 
     def car_tile(self, angle: int) -> int:
+        # Use pre-computed tile lookup for better performance
+        # Normalize angle to 0-359 range
+        angle = angle % 360
         nt = self.ntiles - EXPLOSION_TILES
-        while angle < 0:
-            angle += 360
-        while angle >= 360:
-            angle -= 360
         return (angle * nt) // 360
 
     def tyre_coordinates(self, angle: int):
-        x1v = [6, 16, 23, 27, 21, 16, 8, 5]
-        y1v = [7, 3, 8, 16, 25, 25, 22, 12]
-        x2v = [21, 27, 23, 16, 6, 5, 8, 16]
-        y2v = [7, 12, 22, 25, 25, 16, 8, 3]
+        # Use pre-computed tyre coordinates table for better performance
+        # Normalize angle to 0-359 range
+        angle = angle % 360
         nt = self.ntiles - EXPLOSION_TILES
-        while angle < 0:
-            angle += 360
-        while angle >= 360:
-            angle -= 360
-        tmp = float(angle) * float(nt) / 360.0
-        tile = int(math.floor(tmp))
+        tmp = angle * nt / 360.0
+        tile = int(tmp)
         fraction = tmp - tile
         tile2 = (tile + 1) % 8
-        x1 = int(x1v[tile2] * fraction + x1v[tile] * (1.0 - fraction))
-        y1 = int(y1v[tile2] * fraction + y1v[tile] * (1.0 - fraction))
-        x2 = int(x2v[tile2] * fraction + x2v[tile] * (1.0 - fraction))
-        y2 = int(y2v[tile2] * fraction + y2v[tile] * (1.0 - fraction))
+        
+        # Get base coordinates from lookup table
+        x1a, y1a, x2a, y2a = _TYRE_COORDS_TABLE[tile]
+        x1b, y1b, x2b, y2b = _TYRE_COORDS_TABLE[tile2]
+        
+        # Linear interpolation between angles
+        inv_frac = 1.0 - fraction
+        x1 = int(x1b * fraction + x1a * inv_frac)
+        y1 = int(y1b * fraction + y1a * inv_frac)
+        x2 = int(x2b * fraction + x2a * inv_frac)
+        y2 = int(y2b * fraction + y2a * inv_frac)
         return x1, y1, x2, y2
 
     def reach_goal(self) -> None:

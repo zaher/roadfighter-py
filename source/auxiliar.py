@@ -114,6 +114,12 @@ def draw_line(surface, x1: int, y1: int, x2: int, y2: int, pixel: int) -> None:
     sfc = _surface_value(surface)
     # Get clip rect to avoid drawing outside bounds
     clip = _clip_rect(surface)
+    
+    # Early exit if line is completely outside clip region
+    if (x1 < clip.x and x2 < clip.x) or (x1 >= clip.x + clip.w and x2 >= clip.x + clip.w):
+        return
+    if (y1 < clip.y and y2 < clip.y) or (y1 >= clip.y + clip.h and y2 >= clip.y + clip.h):
+        return
 
     act_x = x1
     act_y = y1
@@ -125,28 +131,26 @@ def draw_line(surface, x1: int, y1: int, x2: int, y2: int, pixel: int) -> None:
     d_x = abs(d_x)
     d_y = abs(d_y)
 
-    # Fast path for horizontal/vertical lines
+    # Fast path for horizontal/vertical lines - use direct pixel array access
+    pixels = _pixels2d(sfc)
+    
     if d_x == 0:
         # Vertical line
         start_y = max(min(y1, y2), clip.y)
         end_y = min(max(y1, y2), clip.y + clip.h - 1)
-        for y in range(start_y, end_y + 1):
-            if clip.x <= x1 < clip.x + clip.w:
-                putpixel(surface, x1, y, pixel)
+        if clip.x <= x1 < clip.x + clip.w:
+            for y in range(start_y, end_y + 1):
+                pixels[y][x1] = pixel
         return
     if d_y == 0:
         # Horizontal line
         start_x = max(min(x1, x2), clip.x)
         end_x = min(max(x1, x2), clip.x + clip.w - 1)
-        for x in range(start_x, end_x + 1):
-            if clip.y <= y1 < clip.y + clip.h:
-                putpixel(surface, x, y1, pixel)
+        if clip.y <= y1 < clip.y + clip.h:
+            pixels[y1][start_x:end_x + 1] = pixel
         return
 
     # General case - Bresenham's algorithm with clipping checks
-    pixels = _pixels2d(sfc)
-    format_ptr = sfc.format
-
     if d_x > d_y:
         for _ in range(d_x + 1):
             if (clip.x <= act_x < clip.x + clip.w and
