@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from .constants import *
+import sdl2
 
 class KeyboardState:
     def __init__(self) -> None:
@@ -77,16 +78,32 @@ class KeyboardState:
                 self._pressed[JOY2_DOWN] = value > JOY_deadzone
 
     def set_joy_button(self, which: int, button: int, pressed: bool) -> None:
-            if which == 0:
-                if (button == 0):
-                    self._pressed[JOY_FIRE] = pressed
-                elif (button == 1):
-                    self._pressed[JOY_SELECT] = pressed
-            else:
-                if (button == 0):
-                    self._pressed[JOY2_FIRE] = pressed
-                elif (button == 1):
-                    self._pressed[JOY2_SELECT] = pressed
+        """Handle joystick/game controller button events.
+
+        Args:
+            which: Controller index (0 or 1)
+            button: Button index (for joysticks) or SDL_CONTROLLER_BUTTON_* constant (for game controllers)
+            pressed: True if pressed, False if released
+        """
+
+        if which == 0:
+            # Map game controller buttons or joystick buttons
+            # SDL_CONTROLLER_BUTTON_A = 0, SDL_CONTROLLER_BUTTON_B = 1, etc.
+            # For joystick fallback, button 0 is typically the first button
+            if button == sdl2.SDL_CONTROLLER_BUTTON_A or button == 0:
+                self._pressed[JOY_FIRE] = pressed
+            elif button == sdl2.SDL_CONTROLLER_BUTTON_B or button == 1:
+                self._pressed[JOY_SELECT] = pressed
+            # Also support START/BACK buttons on controllers
+            elif button == sdl2.SDL_CONTROLLER_BUTTON_START:
+                self._pressed[JOY_SELECT] = pressed
+        else:
+            if button == sdl2.SDL_CONTROLLER_BUTTON_A or button == 0:
+                self._pressed[JOY2_FIRE] = pressed
+            elif button == sdl2.SDL_CONTROLLER_BUTTON_B or button == 1:
+                self._pressed[JOY2_SELECT] = pressed
+            elif button == sdl2.SDL_CONTROLLER_BUTTON_START:
+                self._pressed[JOY2_SELECT] = pressed
 
     def set_joy_hat(self, which: int, hat: int, value: int) -> None:
         """Handle joystick hat/d-pad motion.

@@ -13,28 +13,61 @@ from source.debug import debug_print, set_debug
 from source.roadfighter import RoadFighter
 from source.sound import Sound_initialization
 
-def get_joystick_index(instance_id: int, joysticks: list) -> int:
-    """Find joystick index by SDL instance ID (uses cached IDs)"""
-    for idx, (joystick, cached_id) in enumerate(joysticks):
-        if joystick and cached_id == instance_id:
+
+def get_controller_index(instance_id: int, controllers: list) -> int:
+    """Find controller index by SDL instance ID (uses cached IDs)"""
+    for idx, (controller, cached_id, is_gamecontroller) in enumerate(controllers):
+        if controller and cached_id == instance_id:
             return idx
     return -1
 
+
 def initialize_sdl(fullscreen: bool, debug: bool = False):
-    if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_AUDIO | sdl2.SDL_INIT_JOYSTICK) < 0:
+    if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_AUDIO | sdl2.SDL_INIT_JOYSTICK | sdl2.SDL_INIT_GAMECONTROLLER) < 0:
         raise RuntimeError("SDL_Init failed")
 
-    # Initialize joysticks if available
-    joysticks = []  # Stores tuples of (joystick_pointer, instance_id)
+    # Load game controller mappings from file
+    mapping_file = b"./mapping/gamecontrollerdb.txt"
+    mappings_loaded = sdl2.SDL_GameControllerAddMappingsFromFile(mapping_file)
+    if mappings_loaded > 0:
+        debug_print(f"Loaded {mappings_loaded} game controller mappings from {mapping_file.decode()}")
+    elif mappings_loaded < 0:
+        debug_print(f"Warning: Failed to load game controller mappings from {mapping_file.decode()}")
+
+    # Initialize controllers if available
+    # Stores tuples of (controller_pointer, instance_id, is_gamecontroller)
+    controllers = []
     num_joysticks = sdl2.SDL_NumJoysticks()
-    for i in range(min(num_joysticks, 2)):  # Support up to 2 joysticks
-        joystick = sdl2.SDL_JoystickOpen(i)
-        if not joystick:
-            debug_print(f"Warning: Could not open joystick {i}")
+    for i in range(min(num_joysticks, 2)):  # Support up to 2 controllers
+        # First try to open as game controller
+        if sdl2.SDL_IsGameController(i):
+            gamecontroller = sdl2.SDL_GameControllerOpen(i)
+            if not gamecontroller:
+                debug_print(f"Warning: Could not open game controller {i}")
+            else:
+                joystick = sdl2.SDL_GameControllerGetJoystick(gamecontroller)
+                instance_id = sdl2.SDL_JoystickInstanceID(joystick)
+                name = sdl2.SDL_GameControllerName(gamecontroller)
+                if name:
+                    name = name.decode()
+                else:
+                    name = "Unknown"
+                debug_print(f"GameController {i} initialized: {name} (ID: {instance_id})")
+                controllers.append((gamecontroller, instance_id, True))
         else:
-            instance_id = sdl2.SDL_JoystickInstanceID(joystick)
-            debug_print(f"Joystick {i} initialized: {sdl2.SDL_JoystickName(joystick).decode()} (ID: {instance_id})")
-            joysticks.append((joystick, instance_id))
+            # Fall back to joystick API
+            joystick = sdl2.SDL_JoystickOpen(i)
+            if not joystick:
+                debug_print(f"Warning: Could not open joystick {i}")
+            else:
+                instance_id = sdl2.SDL_JoystickInstanceID(joystick)
+                name = sdl2.SDL_JoystickName(joystick)
+                if name:
+                    name = name.decode()
+                else:
+                    name = "Unknown"
+                debug_print(f"Joystick {i} initialized: {name} (ID: {instance_id})")
+                controllers.append((joystick, instance_id, False))
     if sdlimage.IMG_Init(sdlimage.IMG_INIT_JPG | sdlimage.IMG_INIT_PNG) == 0:
         raise RuntimeError("IMG_Init failed")
     if sdlttf.TTF_Init() != 0:
@@ -81,7 +114,7 @@ def initialize_sdl(fullscreen: bool, debug: bool = False):
     if not screen_texture:
         raise RuntimeError("Failed to create screen texture")
 
-    return window, renderer, screen_texture, joysticks
+    return window, renderer, screen_texture, controllers
 
 
 def toggle_fullscreen(window, fullscreen: bool):
@@ -170,7 +203,7 @@ def main(argv: list[str]) -> int:
     record_replay = args.record_replay
     load_replay = args.load_replay
 
-    window, renderer, screen_texture, joysticks = initialize_sdl(fullscreen, args.debug)
+    window, renderer, screen_texture, controllers = initialize_sdl(fullscreen, args.debug)
 
     # Create surface for software rendering (backward compatibility)
     logical_surface = create_rgb_surface(const.SCREEN_X, const.SCREEN_Y)
@@ -200,26 +233,43 @@ def main(argv: list[str]) -> int:
             ## Key Up
             elif event.type == sdl2.SDL_KEYUP:
                 game.keyboard.set(event.key.keysym.sym, False)
+            # Game Controller Events (preferred)
+            ## Controller Axis
+            elif event.type == sdl2.SDL_CONTROLLERAXISMOTION:
+                ctrl_index = get_controller_index(event.caxis.which, controllers)
+                if ctrl_index >= 0:
+                    game.keyboard.set_joy_axis(ctrl_index, event.caxis.axis, event.caxis.value)
+            ## Controller Button Down
+            elif event.type == sdl2.SDL_CONTROLLERBUTTONDOWN:
+                ctrl_index = get_controller_index(event.cbutton.which, controllers)
+                if ctrl_index >= 0:
+                    game.keyboard.set_joy_button(ctrl_index, event.cbutton.button, True)
+            ## Controller Button Up
+            elif event.type == sdl2.SDL_CONTROLLERBUTTONUP:
+                ctrl_index = get_controller_index(event.cbutton.which, controllers)
+                if ctrl_index >= 0:
+                    game.keyboard.set_joy_button(ctrl_index, event.cbutton.button, False)
+            # Joystick Events (fallback for non-gamecontroller devices)
             ## Axis
             elif event.type == sdl2.SDL_JOYAXISMOTION:
-                joy_index = get_joystick_index(event.jaxis.which, joysticks)
-                if joy_index >= 0:
-                    game.keyboard.set_joy_axis(joy_index, event.jaxis.axis, event.jaxis.value)
+                ctrl_index = get_controller_index(event.jaxis.which, controllers)
+                if ctrl_index >= 0:
+                    game.keyboard.set_joy_axis(ctrl_index, event.jaxis.axis, event.jaxis.value)
             ## Joy Button Down
             elif event.type == sdl2.SDL_JOYBUTTONDOWN:
-                joy_index = get_joystick_index(event.jbutton.which, joysticks)
-                if joy_index >= 0:
-                    game.keyboard.set_joy_button(joy_index, event.jbutton.button, True)
+                ctrl_index = get_controller_index(event.jbutton.which, controllers)
+                if ctrl_index >= 0:
+                    game.keyboard.set_joy_button(ctrl_index, event.jbutton.button, True)
             ## Joy Button Up
             elif event.type == sdl2.SDL_JOYBUTTONUP:
-                joy_index = get_joystick_index(event.jbutton.which, joysticks)
-                if joy_index >= 0:
-                    game.keyboard.set_joy_button(joy_index, event.jbutton.button, False)
+                ctrl_index = get_controller_index(event.jbutton.which, controllers)
+                if ctrl_index >= 0:
+                    game.keyboard.set_joy_button(ctrl_index, event.jbutton.button, False)
             ## Hat Motion
             elif event.type == sdl2.SDL_JOYHATMOTION:
-                joy_index = get_joystick_index(event.jhat.which, joysticks)
-                if joy_index >= 0:
-                    game.keyboard.set_joy_hat(joy_index, event.jhat.hat, event.jhat.value)
+                ctrl_index = get_controller_index(event.jhat.which, controllers)
+                if ctrl_index >= 0:
+                    game.keyboard.set_joy_hat(ctrl_index, event.jhat.hat, event.jhat.value)
         act_time = GetTickCount()
         if act_time - time >= const.REDRAWING_PERIOD:
             time = act_time
@@ -232,9 +282,12 @@ def main(argv: list[str]) -> int:
             present_surface(logical_surface, renderer, screen_texture)
 
     game.close()
-    for joystick, instance_id in joysticks:
-        if joystick:
-            sdl2.SDL_JoystickClose(joystick)
+    for controller, instance_id, is_gamecontroller in controllers:
+        if controller:
+            if is_gamecontroller:
+                sdl2.SDL_GameControllerClose(controller)
+            else:
+                sdl2.SDL_JoystickClose(controller)
     sdl2.SDL_DestroyTexture(screen_texture)
     sdl2.SDL_DestroyRenderer(renderer)
     sdl2.SDL_DestroyWindow(window)
