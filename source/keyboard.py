@@ -64,8 +64,7 @@ class KeyboardState:
             if axis == 0:  # X axis
                 self._pressed[JOY_LEFT] = value < -JOY_deadzone
                 self._pressed[JOY_RIGHT] = value > JOY_deadzone
-
-            elif axis == 1:  # Y axis
+            else: #elif axis == 1:  # Y axis # any number of axis is Y, i have joystick UP and DOWN is 3
                 self._pressed[JOY_UP] = value < -JOY_deadzone
                 self._pressed[JOY_DOWN] = value > JOY_deadzone
         else:
@@ -73,7 +72,7 @@ class KeyboardState:
                 self._pressed[JOY2_LEFT] = value < -JOY_deadzone
                 self._pressed[JOY2_RIGHT] = value > JOY_deadzone
 
-            elif axis == 1:  # Y axis
+            else: #elif axis == 1:  # Y axis , read above
                 self._pressed[JOY2_UP] = value < -JOY_deadzone
                 self._pressed[JOY2_DOWN] = value > JOY_deadzone
 

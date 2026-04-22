@@ -203,7 +203,7 @@ def main(argv: list[str]) -> int:
             ## Axis
             elif event.type == sdl2.SDL_JOYAXISMOTION:
                 joy_index = get_joystick_index(event.jaxis.which, joysticks)
-                if event.jaxis.axis < 2 and joy_index >= 0:
+                if joy_index >= 0:
                     game.keyboard.set_joy_axis(joy_index, event.jaxis.axis, event.jaxis.value)
             ## Joy Button Down
             elif event.type == sdl2.SDL_JOYBUTTONDOWN:
