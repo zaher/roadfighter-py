@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import sys
 
 import sdl2
@@ -111,21 +112,63 @@ def present_surface(surface, renderer, screen_texture):
 
 def main(argv: list[str]) -> int:
     setupTickCount()
+    
+    parser = argparse.ArgumentParser(
+        description="Road Fighter - A retro remake of the classic Konami racing game",
+        epilog="Examples:\n"
+               "  %(prog)s                    # Start at level 1, select mode from menu\n"
+               "  %(prog)s 3                  # Start at level 3\n"
+               "  %(prog)s -l b               # Start level 1 in mode B\n"
+               "  %(prog)s --level c 5        # Start at level 5 in mode C\n"
+               "  %(prog)s --record-replay    # Record gameplay to replay.txt\n"
+               "  %(prog)s --load-replay      # Play back replay from replay.txt",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "start_level",
+        nargs="?",
+        type=int,
+        default=1,
+        choices=range(1, 7),
+        metavar="LEVEL",
+        help="Starting level number (1-6). Higher levels are more difficult with more traffic. (default: 1)"
+    )
+    parser.add_argument(
+        "--level", "-l",
+        type=str,
+        default=None,
+        choices=["a", "b", "c"],
+        dest="level_type",
+        help="Game mode/level type. A=Normal, B=More traffic, C=Night driving. "
+             "If not specified, you will select from the menu."
+    )
+    parser.add_argument(
+        "--record-replay",
+        action="store_true",
+        help="Record all keyboard inputs to replay.txt for later playback. "
+             "The replay includes the random seed, so the same game can be replayed exactly."
+    )
+    parser.add_argument(
+        "--load-replay",
+        action="store_true",
+        help="Load and play back a previously recorded replay from replay.txt. "
+             "The game will run automatically using the recorded inputs."
+    )
+
+    args = parser.parse_args(argv[1:])
+
     fullscreen = False
-    start_level = 1
-    if len(argv) == 2:
-        try:
-            value = int(argv[1])
-            if 1 <= value <= 6:
-                start_level = value
-        except ValueError:
-            pass
+    start_level = args.start_level
+    level_type = args.level_type
+    record_replay = args.record_replay
+    load_replay = args.load_replay
+    
     window, renderer, screen_texture, joysticks = initialize_sdl(fullscreen)
     
     # Create surface for software rendering (backward compatibility)
     logical_surface = create_rgb_surface(const.SCREEN_X, const.SCREEN_Y)
     
-    game = RoadFighter(start_level=start_level)
+    game = RoadFighter(start_level=start_level, level_type=level_type, record_replay=record_replay, load_replay=load_replay)
     event = sdl2.SDL_Event()
     time = GetTickCount()
     running = True

@@ -1,1 +1,1 @@
-start pythonw main.py 4
+start pythonw main.py

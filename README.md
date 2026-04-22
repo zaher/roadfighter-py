@@ -1,45 +1,124 @@
-## Road Fighter ##
+## Road Fighter
 
-A Game based on opensource version of [Road Fighter](https://ecsoft2.org/road-fighter), ported to Python 3/SDL using `gpt 5.4-high` by my friend (thanks for my firend for porting it)
+A game based on the open-source version of [Road Fighter](https://ecsoft2.org/road-fighter), ported to Python 3/SDL using GPT 4.1 by my friend (thanks to my friend for porting it).
 
-### Done ###
+## Features
 
-* Full screen support
+- Full-screen support
+- Joystick support for 2 players
+- Configuration saved in INI format
+- Optimized graphics (converted from BMP to PNG)
+- Hidden cursor while playing
+- Replay recording and playback
 
-* Add Joystick support for 2 players
+## Installation
 
-* Convert BMP to PNG
+This bundle is self-contained. It uses local copies of:
 
-* Hide cursor while playing
+- `roadfighter/` - Game source code
+- `graphics/` - Game graphics (PNG format)
+- `sound/` - Sound effects and music
+- `maps/` - Level maps
+- `fonts/` - Game fonts
 
-* Optimize graphic
+## Usage
 
+Run the game from the project directory:
 
-### Note ###
+```bash
+python main.py
+```
 
-Run from this directory:
+### Command-Line Arguments
 
-python3 main.py
+```
+usage: main.py [-h] [--level {a,b,c}] [--record-replay] [--load-replay] [LEVEL]
 
-Optional:
+Road Fighter - A retro remake of the classic Konami racing game
 
-python3 main.py 3
+positional arguments:
+  LEVEL                 Starting level number (1-6). Higher levels are more
+                        difficult with more traffic. (default: 1)
 
-The optional number is the starting stage, not the menu difficulty.
+options:
+  -h, --help            Show this help message and exit
+  --level {a,b,c}, -l {a,b,c}
+                        Game mode/level type:
+                          a = Normal mode
+                          b = More traffic
+                          c = Night driving
+                        If not specified, you will select from the menu.
+  --record-replay       Record all keyboard inputs to replay.txt for later
+                        playback. The replay includes the random seed, so the
+                        same game can be replayed exactly.
+  --load-replay         Load and play back a previously recorded replay from
+                        replay.txt. The game will run automatically using the
+                        recorded inputs.
+```
 
-- 1 through 6 selects the first stage to play
-- the in-game menu still shows only LEVEL A / LEVEL B / LEVEL C
-- LEVEL A / B / C are the original game modes, separate from stage number
+### Examples
 
-This bundle is self-contained. It uses the local copies of:
+```bash
+# Start at level 1, select mode from menu
+python main.py
 
-- roadfighter/
-- graphics/
-- sound/
-- maps/
-- fonts/
+# Start at level 3
+python main.py 3
 
-Replay toggles:
+# Start level 1 in mode B (more traffic)
+python main.py -l b
 
-- ROADFIGHTER_RECORD_REPLAY=1 python3 main.py
-- ROADFIGHTER_LOAD_REPLAY=1 python3 main.py
+# Start at level 5 in mode C (night driving)
+python main.py --level c 5
+
+# Record gameplay to replay.txt
+python main.py --record-replay
+
+# Play back replay from replay.txt
+python main.py --load-replay
+
+# Combine options: start at level 2, mode A, and record
+python main.py --level a --record-replay 2
+```
+
+### Notes
+
+- **Level Number (1-6)**: Selects the starting stage. Higher levels are more difficult with increased traffic.
+- **Level Type (A/B/C)**: These are the original game modes:
+  - **LEVEL A**: Normal mode - standard gameplay
+  - **LEVEL B**: More traffic - increased enemy vehicles
+  - **LEVEL C**: Night driving - darker visuals with headlights
+
+The level number and level type are independent settings. The in-game menu always shows LEVEL A/B/C, but you can skip directly to any stage (1-6) using the command line.
+
+### Controls
+
+#### Player 1 (Default)
+- **Arrow Keys**: Move car
+- **Space**: Fire / Turbo
+
+#### Player 2 (Default)
+- **WASD**: Move car
+- **Tab**: Fire / Turbo
+
+Joysticks are automatically detected and mapped to player controls.
+
+### Replay System
+
+The replay system records all keyboard inputs along with the random seed, allowing you to replay the exact same game session.
+
+1. **Record a replay**:
+   ```bash
+   python main.py --record-replay
+   ```
+   The replay is saved to `replay.txt` in the userdata directory.
+
+2. **Play back a replay**:
+   ```bash
+   python main.py --load-replay
+   ```
+   The game will automatically play using the recorded inputs.
+
+## License
+
+This is a remake of the original Road Fighter by Konami. The original code was open-sourced and has been ported to modern Python/SDL.

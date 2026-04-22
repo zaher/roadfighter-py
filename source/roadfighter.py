@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from ctypes import byref
-import os
 
 import sdl2
 import sdl2.sdlimage as sdlimage
@@ -46,8 +45,9 @@ class ListWrapper:
 ## Game object
 
 class RoadFighter:
-    def __init__(self, start_level: int = 1) -> None:
+    def __init__(self, start_level: int = 1, level_type: str | None = None, record_replay: bool = False, load_replay: bool = False) -> None:
         self.start_level = start_level
+        self.level_type = level_type
         self.screen_w = const.SCREEN_X
         self.screen_h = const.SCREEN_Y
 
@@ -79,7 +79,7 @@ class RoadFighter:
         self._menu_surface_cache = {}
         self._score_surface_cache = {}
 
-        self.game_mode = 0
+        self.game_mode = {"a": 0, "b": 1, "c": 2}.get(level_type, 0) if level_type else 0
         self.n_players = 1
         self.game_remake_extras = True
         self.playing_reachedend = False
@@ -88,13 +88,11 @@ class RoadFighter:
 
         self.keyboard = KeyboardState()
         self.old_keyboard = KeyboardState()
-
         # Load configuration
         cfg = load_configuration()
         self.replay_fp = None
-        self.record_replay = os.environ.get("ROADFIGHTER_RECORD_REPLAY", "").lower() in {"1", "true", "yes", "on"}
-        self.load_replay = os.environ.get("ROADFIGHTER_LOAD_REPLAY", "").lower() in {"1", "true", "yes", "on"}
-
+        self.record_replay = record_replay
+        self.load_replay = load_replay
         comic_font = str(resolve_path("fonts/comicbd.ttf", FileType.GAMEDATA)).encode("utf-8")
         tangle_font = str(resolve_path("fonts/tanglewo.ttf", FileType.GAMEDATA)).encode("utf-8")
         self.font1 = sdlttf.TTF_OpenFont(comic_font, 16)
