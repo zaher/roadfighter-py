@@ -11,7 +11,7 @@ class KeyboardState:
 
     def set_joy_mapping(self, mapping: dict[int, list[int]]) -> None:
         """Set the joystick-to-keyboard mapping.
-        
+
         Args:
             mapping: Dictionary mapping keyboard keycodes to lists of joystick keycodes.
                     When a keyboard key is checked, its mapped joystick keys are also checked.
@@ -81,12 +81,12 @@ class KeyboardState:
             if which == 0:
                 if (button == 0):
                     self._pressed[JOY_FIRE] = pressed
-                else:
+                elif (button == 1):
                     self._pressed[JOY_SELECT] = pressed
             else:
                 if (button == 0):
                     self._pressed[JOY2_FIRE] = pressed
-                else:
+                elif (button == 1):
                     self._pressed[JOY2_SELECT] = pressed
 
     def update() -> None:
