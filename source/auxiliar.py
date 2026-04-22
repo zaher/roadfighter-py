@@ -114,7 +114,7 @@ def draw_line(surface, x1: int, y1: int, x2: int, y2: int, pixel: int) -> None:
     sfc = _surface_value(surface)
     # Get clip rect to avoid drawing outside bounds
     clip = _clip_rect(surface)
-    
+
     act_x = x1
     act_y = y1
     errterm = 0
@@ -124,7 +124,7 @@ def draw_line(surface, x1: int, y1: int, x2: int, y2: int, pixel: int) -> None:
     incx = -1 if d_x < 0 else 1
     d_x = abs(d_x)
     d_y = abs(d_y)
-    
+
     # Fast path for horizontal/vertical lines
     if d_x == 0:
         # Vertical line
@@ -142,14 +142,14 @@ def draw_line(surface, x1: int, y1: int, x2: int, y2: int, pixel: int) -> None:
             if clip.y <= y1 < clip.y + clip.h:
                 putpixel(surface, x, y1, pixel)
         return
-    
+
     # General case - Bresenham's algorithm with clipping checks
     pixels = _pixels2d(sfc)
     format_ptr = sfc.format
-    
+
     if d_x > d_y:
         for _ in range(d_x + 1):
-            if (clip.x <= act_x < clip.x + clip.w and 
+            if (clip.x <= act_x < clip.x + clip.w and
                 clip.y <= act_y < clip.y + clip.h):
                 pixels[act_y][act_x] = pixel
             errterm += d_y
@@ -159,7 +159,7 @@ def draw_line(surface, x1: int, y1: int, x2: int, y2: int, pixel: int) -> None:
             act_x += incx
     else:
         for _ in range(d_y + 1):
-            if (clip.x <= act_x < clip.x + clip.w and 
+            if (clip.x <= act_x < clip.x + clip.w and
                 clip.y <= act_y < clip.y + clip.h):
                 pixels[act_y][act_x] = pixel
             errterm += d_x
@@ -321,13 +321,10 @@ def multiline_text_surface2(text: str, line_dist: int, font, c1, c2, line: int, 
     total_height = 0
     for current_line, item in enumerate(text.splitlines()):
         if current_line == line:
-            # Glow from red to bright white based on glow intensity
-            # Normalize glow from [0.125, 0.625] to [0, 1] range
-            normalized_glow = (glow - 0.125) / 0.5
-            normalized_glow = max(0.0, min(1.0, normalized_glow))
-            r = 255  # Full red always
-            g = int(255 * normalized_glow)  # Green increases with glow
-            b = int(255 * normalized_glow)  # Blue increases with glow
+            # Red color with glow intensity
+            r = 255
+            g = int(255 * glow)
+            b = int(255 * glow)
             color = sdl2.SDL_Color(r, g, b, 255)
         else:
             color = c1
@@ -369,27 +366,27 @@ def _transformed_bounds(width: int, height: int, hot_x: float, hot_y: float, ang
 
 def sge_transform(src, dest, angle_deg: float, scale_x: float, scale_y: float, hot_x: int, hot_y: int, pos_x: int, pos_y: int, _flags: int) -> None:
     from sdl2 import sdlgfx
-    
+
     src_sfc = _surface_value(src)
     dest_sfc = _surface_value(dest)
     if scale_x <= 0 or scale_y <= 0:
         return
-    
+
     # Use SDL_gfx optimized rotozoom instead of pixel-per-pixel Python loop
     transformed = sdlgfx.rotozoomSurfaceXY(src, angle_deg, scale_x, scale_y, sdlgfx.SMOOTHING_OFF)
     if not transformed:
         return
-    
+
     try:
         transformed_sfc = _surface_value(transformed)
         dst_w = transformed_sfc.w
         dst_h = transformed_sfc.h
-        
+
         # Calculate position using bounds for backward compatibility
         min_x, max_x, min_y, max_y = _transformed_bounds(src_sfc.w, src_sfc.h, hot_x, hot_y, angle_deg, scale_x, scale_y)
         x = pos_x + min_x
         y = pos_y + min_y
-        
+
         rect = sdl2.SDL_Rect(int(x), int(y), dst_w, dst_h)
         sdl2.SDL_BlitSurface(transformed, None, dest, rect)
     finally:

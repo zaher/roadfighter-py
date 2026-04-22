@@ -347,7 +347,7 @@ class RoadFighter:
         elif self.menu_redefining_key == 9 and key not in (self.right2_key, self.left2_key, self.fire2_key, self.up2_key):
             self.down2_key = key
             key_changed = True
-        
+
         # Update joystick mapping if keys were changed
         if key_changed:
             self.update_joystick_mapping()

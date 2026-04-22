@@ -6,9 +6,14 @@ A Game based on opensource version of [Road Fighter](https://ecsoft2.org/road-fi
 
 * Full screen support
 
-### Plan ###
-
 * Add Joystick support for 2 players
+
+* Convert BMP to PNG
+
+* Hide cursor while playing
+
+* Optimize graphic
+
 
 ### Note ###
 
