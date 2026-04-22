@@ -515,15 +515,15 @@ class RoadFighter:
             if self.menu_nitems > 5:
                 options_surface = multiline_text_surface2(self.menu_options_text, 0, self.font2small, sdl2.SDL_Color(224, 224, 224, 255), sdl2.SDL_Color(255, 255, 255, 255), self.menu_item if self.menu_state == 2 else -1, glow if self.menu_state == 2 else 0.0)
                 y_inc = int(const.FONT_SIZE * 0.65)
-                y_start = 9
+                y_start = 4
             elif self.menu_nitems > 4:
                 options_surface = multiline_text_surface2(self.menu_options_text, 2, self.font2medium, sdl2.SDL_Color(224, 224, 224, 255), sdl2.SDL_Color(255, 255, 255, 255), self.menu_item if self.menu_state == 2 else -1, glow if self.menu_state == 2 else 0.0)
                 y_inc = int(2 + const.FONT_SIZE * 0.8)
-                y_start = 12
+                y_start = 8
             else:
                 options_surface = multiline_text_surface2(self.menu_options_text, 4, self.font2big, sdl2.SDL_Color(224, 224, 224, 255), sdl2.SDL_Color(255, 255, 255, 255), self.menu_item if self.menu_state == 2 else -1, glow if self.menu_state == 2 else 0.0)
                 y_inc = 4 + const.FONT_SIZE
-                y_start = 15
+                y_start = 10
             cached = (title_surface, options_surface, y_inc, y_start)
             self._menu_surface_cache[cache_key] = cached
         title_surface, options_surface, y_inc, y_start = cached
