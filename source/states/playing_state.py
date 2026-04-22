@@ -3,6 +3,8 @@ from __future__ import annotations
 import random
 import time
 
+import sdl2
+
 from .. import constants as const
 from ..filehandling import FileType, f1open
 from ..sound import Sound_create_music, Sound_music_volume
@@ -17,11 +19,18 @@ def _close_replay(roadfighter) -> None:
         roadfighter.replay_fp = None
 
 
+def _show_cursor() -> None:
+    """Show mouse cursor when leaving playing state."""
+    sdl2.SDL_ShowCursor(sdl2.SDL_ENABLE)
+
+
 def playing_cycle(roadfighter) -> int:
     active_record = record_replay or roadfighter.record_replay
     active_load = load_replay or roadfighter.load_replay
 
     if roadfighter.state_timmer == 0:
+        # Hide mouse cursor when race starts
+        sdl2.SDL_ShowCursor(sdl2.SDL_DISABLE)
         if active_record:
             seed = int(time.time())
             roadfighter.replay_fp = f1open("replay.txt", "w+", FileType.USERDATA)
@@ -43,6 +52,7 @@ def playing_cycle(roadfighter) -> int:
             line = roadfighter.replay_fp.readline()
             if not line:
                 _close_replay(roadfighter)
+                _show_cursor()
                 return const.GAMEOVER_STATE
             line = line.strip()
             if not line:
@@ -57,6 +67,7 @@ def playing_cycle(roadfighter) -> int:
             roadfighter.current_level += 1
             if active_record or active_load:
                 _close_replay(roadfighter)
+            _show_cursor()
             return const.INTERLEVEL_STATE
         if roadfighter.game.backspace_pressed:
             roadfighter.game.close()
@@ -64,10 +75,12 @@ def playing_cycle(roadfighter) -> int:
             roadfighter.current_level = roadfighter.start_level
             if active_record or active_load:
                 _close_replay(roadfighter)
+            _show_cursor()
             return const.INTERLEVEL_STATE
         roadfighter.gameover_state = 0
         if active_record or active_load:
             _close_replay(roadfighter)
+        _show_cursor()
         return const.GAMEOVER_STATE
     if not roadfighter.playing_reachedend and roadfighter.game.level_completed():
         roadfighter.playing_reachedend = True
