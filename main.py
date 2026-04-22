@@ -54,11 +54,11 @@ def initialize_sdl(fullscreen: bool, debug: bool = False):
     )
     if not window:
         raise RuntimeError("SDL_CreateWindow failed")
-    
+
     # Create hardware-accelerated renderer
     renderer = sdl2.SDL_CreateRenderer(
-        window, 
-        -1, 
+        window,
+        -1,
         sdl2.SDL_RENDERER_ACCELERATED | sdl2.SDL_RENDERER_PRESENTVSYNC
     )
     if not renderer:
@@ -66,10 +66,10 @@ def initialize_sdl(fullscreen: bool, debug: bool = False):
         renderer = sdl2.SDL_CreateRenderer(window, -1, sdl2.SDL_RENDERER_SOFTWARE)
         if not renderer:
             raise RuntimeError("SDL_CreateRenderer failed")
-    
+
     # Set logical size for automatic scaling
     sdl2.SDL_RenderSetLogicalSize(renderer, const.SCREEN_X, const.SCREEN_Y)
-    
+
     # Create render target texture for the game screen
     screen_texture = sdl2.SDL_CreateTexture(
         renderer,
@@ -80,7 +80,7 @@ def initialize_sdl(fullscreen: bool, debug: bool = False):
     )
     if not screen_texture:
         raise RuntimeError("Failed to create screen texture")
-    
+
     return window, renderer, screen_texture, joysticks
 
 
@@ -103,7 +103,7 @@ def present_surface(surface, renderer, screen_texture):
     """Present a surface using the GPU renderer."""
     # Update texture with surface pixels
     sdl2.SDL_UpdateTexture(screen_texture, None, surface.contents.pixels, surface.contents.pitch)
-    
+
     # Clear and render
     sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255)
     sdl2.SDL_RenderClear(renderer)
@@ -113,7 +113,7 @@ def present_surface(surface, renderer, screen_texture):
 
 def main(argv: list[str]) -> int:
     setupTickCount()
-    
+
     parser = argparse.ArgumentParser(
         description="Road Fighter - A retro remake of the classic Konami racing game",
         epilog="Examples:\n"
@@ -169,12 +169,12 @@ def main(argv: list[str]) -> int:
     level_type = args.level_type
     record_replay = args.record_replay
     load_replay = args.load_replay
-    
+
     window, renderer, screen_texture, joysticks = initialize_sdl(fullscreen, args.debug)
-    
+
     # Create surface for software rendering (backward compatibility)
     logical_surface = create_rgb_surface(const.SCREEN_X, const.SCREEN_Y)
-    
+
     game = RoadFighter(start_level=start_level, level_type=level_type, record_replay=record_replay, load_replay=load_replay)
     event = sdl2.SDL_Event()
     time = GetTickCount()
@@ -215,18 +215,22 @@ def main(argv: list[str]) -> int:
                 joy_index = get_joystick_index(event.jbutton.which, joysticks)
                 if joy_index >= 0:
                     game.keyboard.set_joy_button(joy_index, event.jbutton.button, False)
-
+            ## Hat Motion
+            elif event.type == sdl2.SDL_JOYHATMOTION:
+                joy_index = get_joystick_index(event.jhat.which, joysticks)
+                if joy_index >= 0:
+                    game.keyboard.set_joy_hat(joy_index, event.jhat.hat, event.jhat.value)
         act_time = GetTickCount()
         if act_time - time >= const.REDRAWING_PERIOD:
             time = act_time
             running = running and game.cycle()
-            
+
             # Draw to surface (backward compatible)
             game.draw(logical_surface)
-            
+
             # Present via GPU
             present_surface(logical_surface, renderer, screen_texture)
-            
+
     game.close()
     for joystick, instance_id in joysticks:
         if joystick:

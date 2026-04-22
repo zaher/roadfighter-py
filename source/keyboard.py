@@ -89,5 +89,24 @@ class KeyboardState:
                 elif (button == 1):
                     self._pressed[JOY2_SELECT] = pressed
 
+    def set_joy_hat(self, which: int, hat: int, value: int) -> None:
+        """Handle joystick hat/d-pad motion.
+
+        Args:
+            which: Joystick index (0 or 1)
+            hat: Hat index
+            value: Hat position (SDL_HAT_UP, SDL_HAT_DOWN, SDL_HAT_LEFT, SDL_HAT_RIGHT)
+        """
+        if which == 0:
+            self._pressed[JOY_UP] = bool(value & 1)    # SDL_HAT_UP = 1
+            self._pressed[JOY_RIGHT] = bool(value & 2)  # SDL_HAT_RIGHT = 2
+            self._pressed[JOY_DOWN] = bool(value & 4)   # SDL_HAT_DOWN = 4
+            self._pressed[JOY_LEFT] = bool(value & 8)   # SDL_HAT_LEFT = 8
+        else:
+            self._pressed[JOY2_UP] = bool(value & 1)
+            self._pressed[JOY2_RIGHT] = bool(value & 2)
+            self._pressed[JOY2_DOWN] = bool(value & 4)
+            self._pressed[JOY2_LEFT] = bool(value & 8)
+
     def update() -> None:
         pass
