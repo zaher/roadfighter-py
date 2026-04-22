@@ -234,6 +234,14 @@ def Sound_play_working_chunk(working_chunk, channel: int = -1) -> int:
     return Mix_PlayChannel(channel, chunk_ptr, 0)
 
 
+def Sound_play_chunk_loop(working_chunk, channel: int = -1) -> int:
+    """Play a working chunk in an infinite loop on the given channel."""
+    if not sound_enabled or working_chunk is None:
+        return -1
+    chunk_ptr = ctypes.pointer(working_chunk)
+    return Mix_PlayChannel(channel, chunk_ptr, -1)
+
+
 class EngineSoundPlayer:
     """Continuous looping engine sound with real-time pitch shifting using SDL audio."""
 

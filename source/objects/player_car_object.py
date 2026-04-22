@@ -26,6 +26,7 @@ from ..sound import (
     Sound_halt_channel,
     Sound_make_working_chunk,
     Sound_play,
+    Sound_play_chunk_loop,
     Sound_play_working_chunk,
     Sound_resample_working_chunk,
     EngineSound_create,
@@ -79,6 +80,7 @@ class CPlayerCarObject(CCarObject):
         self.sound_timmer = 0
         self.enginesound_channel = -1
         self.skidsound_channel = -1
+        self._skid_factor = 1.0
         # New SDL-based continuous looping engine sound
         self.engine_sound_player = EngineSound_create(self.game.S_carengine)
         self.S_carskid_working, self._skid_buffer = Sound_make_working_chunk(self.game.S_carskid)
@@ -346,17 +348,20 @@ class CPlayerCarObject(CCarObject):
                 self.engine_sound_player.set_pan(pan)
                 EngineSound_update(self.engine_sound_player, speed_ratio)
 
-            # Handle skid sound
+            # Handle skid sound using SDL2 native looping
             if self.state in (5, 6) and self.game.S_carskid:
                 skid_factor = 1.0 if self.state_timmer < 16 else 1.5
-                Sound_resample_working_chunk(self.game.S_carskid, self.S_carskid_working, skid_factor, "both")
-                if self.skidsound_channel == -1:
-                    self.skidsound_channel = Sound_play_working_chunk(self.S_carskid_working, -1)
-                else:
-                    self.skidsound_channel = Sound_play_working_chunk(self.S_carskid_working, self.skidsound_channel)
+                # Only resample and restart when factor changes or not playing
+                if self.skidsound_channel == -1 or abs(self._skid_factor - skid_factor) > 0.01:
+                    self._skid_factor = skid_factor
+                    Sound_resample_working_chunk(self.game.S_carskid, self.S_carskid_working, skid_factor, "both")
+                    if self.skidsound_channel != -1:
+                        Sound_halt_channel(self.skidsound_channel)
+                    self.skidsound_channel = Sound_play_chunk_loop(self.S_carskid_working, -1)
             elif self.skidsound_channel != -1:
                 Sound_halt_channel(self.skidsound_channel)
                 self.skidsound_channel = -1
+                self._skid_factor = 1.0
         else:
             # Stop engine sound when not driving
             if self.engine_sound_player is not None and self.engine_sound_player.is_playing:
