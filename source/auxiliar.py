@@ -332,6 +332,9 @@ def multiline_text_surface2(text: str, line_dist: int, font, c1, c2, line: int, 
         else:
             color = c1
         surface = TTF_RenderText_Blended(font, item.encode("utf-8"), color)
+        if surface is None:
+            # Skip lines that fail to render
+            continue
         rendered.append((current_line, surface))
         max_width = max(max_width, surface.contents.w)
         total_height += surface.contents.h

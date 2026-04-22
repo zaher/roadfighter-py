@@ -22,6 +22,7 @@ from .states.gameover_state import gameover_cycle, gameover_draw
 from .states.interlevel_state import interlevel_cycle, interlevel_draw
 from .states.konami_state import konami_cycle, konami_draw
 from .states.menu_state import menu_cycle, menu_draw
+from .states.network_menu_state import network_menu_cycle, network_menu_draw
 from .states.playing_state import playing_cycle, playing_draw
 from .states.presentation_state import presentation_cycle, presentation_draw
 from .tile import CTile
@@ -86,8 +87,14 @@ class RoadFighter:
         self.scoreboard_x = -1
         self.desired_scoreboard_x = self.screen_w
 
-        self.keyboard = KeyboardState()
-        self.old_keyboard = KeyboardState()
+        # Network multiplayer
+        self.network = None
+        self.is_network_game = False
+        self.network_player_id = 0  # 0 = host/player 1, 1 = client/player 2
+
+        # Keyboard will be re-initialized when network mode is determined
+        self.keyboard = KeyboardState(is_network_game=False)
+        self.old_keyboard = KeyboardState(is_network_game=False)
 
         # Load configuration
         cfg = load_configuration()
@@ -201,6 +208,8 @@ class RoadFighter:
             self.state = konami_cycle(self)
         elif self.state == const.MENU_STATE:
             self.state = menu_cycle(self)
+        elif self.state == const.NETWORK_MENU_STATE:
+            self.state = network_menu_cycle(self)
         elif self.state == const.DEMO_STATE:
             self.state = const.KONAMI_STATE
         elif self.state == const.PLAYING_STATE:
@@ -229,6 +238,9 @@ class RoadFighter:
         if self.game is not None:
             self.game.close()
             self.game = None
+        if self.network is not None:
+            self.network.stop()
+            self.network = None
 
     def draw(self, screen) -> None:
         if self.state_timmer == 0:
@@ -239,6 +251,8 @@ class RoadFighter:
             konami_draw(self, screen)
         elif self.state == const.MENU_STATE:
             menu_draw(self, screen)
+        elif self.state == const.NETWORK_MENU_STATE:
+            network_menu_draw(self, screen)
         elif self.state == const.PLAYING_STATE:
             playing_draw(self, screen)
         elif self.state == const.INTERLEVEL_STATE:
@@ -357,8 +371,8 @@ class RoadFighter:
             return
         if self.menu_current_menu == 0:
             self.menu_tittle_text = "PLAY SELECT:"
-            self.menu_options_text = "ONE PLAYER\nTWO PLAYERS\nOPTIONS\nQUIT\n"
-            self.menu_nitems = 4
+            self.menu_options_text = "ONE PLAYER\nTWO PLAYERS\nNETWORK GAME\nOPTIONS\nQUIT\n"
+            self.menu_nitems = 5
         elif self.menu_current_menu == 1:
             self.menu_tittle_text = "OPTIONS:"
             extras = "ON" if self.game_remake_extras else "OFF"
@@ -406,10 +420,13 @@ class RoadFighter:
                 self.menu_timmer = 0
                 self.menu_current_menu = 5
             elif self.menu_item == 2:
+                # Network game menu
+                return const.NETWORK_MENU_STATE
+            elif self.menu_item == 3:
                 self.menu_state = 1
                 self.menu_timmer = 0
                 self.menu_current_menu = 1
-            elif self.menu_item == 3:
+            elif self.menu_item == 4:
                 self.menu_state = 4
                 self.menu_timmer = const.EFFECT_LENGTH
             return const.MENU_STATE
@@ -463,12 +480,13 @@ class RoadFighter:
         )
 
     def resolve_menu_exit(self) -> int:
-        if self.menu_current_menu == 0 and self.menu_item == 3:
+        if self.menu_current_menu == 0 and self.menu_item == 4:
             Sound_release_music()
             return const.QUIT_STATE
         if self.menu_current_menu == 4 and self.menu_item in (0, 1, 2):
             self.game_mode = self.menu_item
             self.n_players = 1
+            self.is_network_game = False
             self.current_level = self.start_level
             self.scoreboard_x = -1
             self.interlevel_state = 0
@@ -478,6 +496,18 @@ class RoadFighter:
         if self.menu_current_menu == 5 and self.menu_item in (0, 1, 2):
             self.game_mode = self.menu_item
             self.n_players = 2
+            self.is_network_game = False
+            self.current_level = self.start_level
+            self.scoreboard_x = -1
+            self.interlevel_state = 0
+            self.interlevel_timmer = 0
+            Sound_release_music()
+            return const.INTERLEVEL_STATE
+        # Network game exit (from network_menu_state.py callback)
+        if self.menu_current_menu == 6 and self.menu_item in (0, 1, 2):
+            self.game_mode = self.menu_item
+            self.n_players = 2
+            self.is_network_game = True
             self.current_level = self.start_level
             self.scoreboard_x = -1
             self.interlevel_state = 0

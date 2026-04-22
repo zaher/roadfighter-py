@@ -51,6 +51,15 @@ def interlevel_cycle(roadfighter) -> int:
             roadfighter.game = None
 
         map_name = const.MAPS[roadfighter.current_level - 1]
+        
+        # Re-initialize keyboard for network mode if needed
+        if roadfighter.is_network_game:
+            roadfighter.keyboard = roadfighter.keyboard.__class__(is_network_game=True)
+            roadfighter.old_keyboard = roadfighter.keyboard.copy()
+            # Set player ID based on whether we're host or client
+            if roadfighter.network:
+                roadfighter.network_player_id = roadfighter.network.local_player_id
+        
         if roadfighter.n_players == 1:
             roadfighter.game = CGame(map_name, roadfighter.game_mode, roadfighter.left_key, roadfighter.right_key, roadfighter.fire_key, score1, roadfighter.current_level, roadfighter.game_remake_extras)
         else:

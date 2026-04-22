@@ -10,6 +10,7 @@ from source import constants as const
 from source.auxiliar import GetTickCount, create_rgb_surface, pause, setupTickCount
 from source.roadfighter import RoadFighter
 from source.sound import Sound_initialization
+from source.network import P2PNetwork, PlayerInput
 
 def get_joystick_index(instance_id: int, joysticks: list) -> int:
     """Find joystick index by SDL instance ID (uses cached IDs)"""
@@ -169,6 +170,41 @@ def main(argv: list[str]) -> int:
         act_time = GetTickCount()
         if act_time - time >= const.REDRAWING_PERIOD:
             time = act_time
+            
+            # Network game handling
+            if game.is_network_game and game.network:
+                # Update network (process received packets)
+                game.network.update()
+                
+                # Send local input to remote peer
+                if game.state == const.PLAYING_STATE:
+                    local_input = PlayerInput(
+                        frame_number=0,  # Will be set by network
+                        left=game.keyboard.get_player_input(0)['left'],
+                        right=game.keyboard.get_player_input(0)['right'],
+                        up=game.keyboard.get_player_input(0)['up'],
+                        down=game.keyboard.get_player_input(0)['down'],
+                        fire=game.keyboard.get_player_input(0)['fire']
+                    )
+                    game.network.send_input(local_input)
+                    
+                    # Receive and apply remote input
+                    remote_input = game.network.get_latest_remote_input()
+                    if remote_input:
+                        game.keyboard.set_remote_input({
+                            'left': remote_input.left,
+                            'right': remote_input.right,
+                            'up': remote_input.up,
+                            'down': remote_input.down,
+                            'fire': remote_input.fire
+                        })
+                    else:
+                        # No input received yet, use default
+                        game.keyboard.set_remote_input({
+                            'left': False, 'right': False, 
+                            'up': False, 'down': False, 'fire': False
+                        })
+            
             running = running and game.cycle()
             
             # Draw to surface (backward compatible)
