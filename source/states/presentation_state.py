@@ -44,4 +44,3 @@ def presentation_draw(roadfighter, screen) -> None:
     fade = float(roadfighter.presentation_timmer) / float(const.PRESENTATION_FADE_TIME)
     if fade < 1.0:
         surface_fader(screen, max(0.0, fade), max(0.0, fade), max(0.0, fade), None)
-

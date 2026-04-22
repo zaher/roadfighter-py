@@ -82,6 +82,7 @@ class RoadFighter:
 
         self.game_mode = {"a": 0, "b": 1, "c": 2}.get(level_type, 0) if level_type else 0
         self.n_players = 1
+        self.is_player2 = False # when player 2 pressed fire
         self.game_remake_extras = True
         self.playing_reachedend = False
         self.scoreboard_x = -1
@@ -503,6 +504,7 @@ class RoadFighter:
         if self.menu_current_menu == 4 and self.menu_item in (0, 1, 2):
             self.game_mode = self.menu_item
             self.n_players = 1
+            #self.is_player2 = False
             self.current_level = self.start_level
             self.scoreboard_x = -1
             self.interlevel_state = 0
@@ -512,6 +514,7 @@ class RoadFighter:
         if self.menu_current_menu == 5 and self.menu_item in (0, 1, 2):
             self.game_mode = self.menu_item
             self.n_players = 2
+            self.is_player2 = False
             self.current_level = self.start_level
             self.scoreboard_x = -1
             self.interlevel_state = 0

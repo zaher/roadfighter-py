@@ -51,21 +51,22 @@ def menu_cycle(roadfighter) -> int:
                 roadfighter.menu_redefining_key = -1
                 break
         else:
-            if roadfighter.keyboard[roadfighter.down_key] and not roadfighter.old_keyboard[roadfighter.down_key]:
+            if (roadfighter.keyboard[roadfighter.down_key] and not roadfighter.old_keyboard[roadfighter.down_key]) or (roadfighter.keyboard[roadfighter.down2_key] and not roadfighter.old_keyboard[roadfighter.down2_key]):
                 Sound_play(roadfighter.S_menu_move)
                 roadfighter.menu_item += 1
-            if roadfighter.keyboard[roadfighter.up_key] and not roadfighter.old_keyboard[roadfighter.up_key]:
+            if (roadfighter.keyboard[roadfighter.up_key] and not roadfighter.old_keyboard[roadfighter.up_key]) or (roadfighter.keyboard[roadfighter.up2_key] and not roadfighter.old_keyboard[roadfighter.up2_key]):
                 Sound_play(roadfighter.S_menu_move)
                 roadfighter.menu_item -= 1
             roadfighter.menu_item = max(0, min(roadfighter.menu_nitems - 1, roadfighter.menu_item))
 
             selecting = (
                 (roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key])
+                or (roadfighter.keyboard[roadfighter.fire2_key] and not roadfighter.old_keyboard[roadfighter.fire2_key])
                 or (roadfighter.keyboard[const.GLOBAL_SELECT_KEY] and not roadfighter.old_keyboard[const.GLOBAL_SELECT_KEY])
                 or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY])
             )
             if selecting:
-                if (roadfighter.keyboard[roadfighter.left_key] and not roadfighter.old_keyboard[roadfighter.left_key]) or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY]):
+                if (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY]):
                     roadfighter.menu_item = roadfighter.menu_nitems - 1
                 Sound_play(roadfighter.S_menu_select)
                 if roadfighter.menu_current_menu == 0:
@@ -118,6 +119,7 @@ def menu_cycle(roadfighter) -> int:
                         roadfighter.menu_timmer = const.TEXT_EFFECT_LENGTH
                 else:
                     roadfighter.menu_state = 3
+                    roadfighter.is_player2 = roadfighter.keyboard[roadfighter.fire2_key]
                     roadfighter.menu_timmer = const.TEXT_EFFECT_LENGTH
     elif roadfighter.menu_state == 3:
         roadfighter.menu_timmer -= 1

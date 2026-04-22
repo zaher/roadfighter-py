@@ -53,7 +53,10 @@ def interlevel_cycle(roadfighter) -> int:
 
         map_name = const.MAPS[roadfighter.current_level - 1]
         if roadfighter.n_players == 1:
-            roadfighter.game = CGame(map_name, roadfighter.game_mode, roadfighter.left_key, roadfighter.right_key, roadfighter.fire_key, score1, roadfighter.current_level, roadfighter.game_remake_extras)
+            if roadfighter.is_player2:
+                roadfighter.game = CGame(map_name, roadfighter.game_mode, roadfighter.left2_key, roadfighter.right2_key, roadfighter.fire2_key, score2, roadfighter.current_level, roadfighter.game_remake_extras)
+            else:
+                roadfighter.game = CGame(map_name, roadfighter.game_mode, roadfighter.left_key, roadfighter.right_key, roadfighter.fire_key, score1, roadfighter.current_level, roadfighter.game_remake_extras)
         else:
             roadfighter.game = CGame(map_name, roadfighter.game_mode, roadfighter.left_key, roadfighter.right_key, roadfighter.fire_key, roadfighter.left2_key, roadfighter.right2_key, roadfighter.fire2_key, score1, score2, roadfighter.current_level, roadfighter.game_remake_extras)
 
@@ -71,7 +74,11 @@ def interlevel_cycle(roadfighter) -> int:
     elif roadfighter.interlevel_state == 1:
         if roadfighter.state_timmer >= const.INTERLEVEL_TIME * 4 or (
             roadfighter.interlevel_timmer >= const.INTERLEVEL_TIME * 2
-            and ((roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key]) or (roadfighter.keyboard[sdl2.SDLK_ESCAPE] and not roadfighter.old_keyboard[sdl2.SDLK_ESCAPE]))
+            and (
+                    (roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key])
+                    or (roadfighter.keyboard[roadfighter.fire2_key] and not roadfighter.old_keyboard[roadfighter.fire2_key])
+                    or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY])
+                )
         ):
             roadfighter.interlevel_state = 2
             if roadfighter.interlevel_timmer >= const.INTERLEVEL_TIME:
@@ -87,7 +94,11 @@ def interlevel_cycle(roadfighter) -> int:
     elif roadfighter.interlevel_state == 3:
         if roadfighter.interlevel_timmer >= const.INTERLEVEL_TIME * 5 or (
             roadfighter.interlevel_timmer >= const.INTERLEVEL_TIME
-            and ((roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key]) or (roadfighter.keyboard[sdl2.SDLK_ESCAPE] and not roadfighter.old_keyboard[sdl2.SDLK_ESCAPE]))
+            and (
+                    (roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key])
+                    or (roadfighter.keyboard[roadfighter.fire2_key] and not roadfighter.old_keyboard[roadfighter.fire2_key])
+                    or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY])
+                )
         ):
             roadfighter.interlevel_state = 4
             if roadfighter.interlevel_timmer >= const.INTERLEVEL_TIME:

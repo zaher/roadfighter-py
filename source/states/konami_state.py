@@ -19,6 +19,7 @@ def konami_cycle(roadfighter) -> int:
     if roadfighter.konami_state == 0 and (
         roadfighter.state_timmer >= 350
         or (roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key])
+        or (roadfighter.keyboard[roadfighter.fire2_key] and not roadfighter.old_keyboard[roadfighter.fire2_key])
         or (roadfighter.keyboard[const.GLOBAL_SELECT_KEY] and not roadfighter.old_keyboard[const.GLOBAL_SELECT_KEY])
         or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY])
     ):

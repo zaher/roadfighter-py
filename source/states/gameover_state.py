@@ -34,6 +34,7 @@ def gameover_cycle(roadfighter) -> int:
             roadfighter.state_timmer >= const.GAMEOVER_TIME
             and (
                 (roadfighter.keyboard[roadfighter.fire_key] and not roadfighter.old_keyboard[roadfighter.fire_key])
+                or (roadfighter.keyboard[roadfighter.fire2_key] and not roadfighter.old_keyboard[roadfighter.fire2_key])
                 or (roadfighter.keyboard[const.GLOBAL_SELECT_KEY] and not roadfighter.old_keyboard[const.GLOBAL_SELECT_KEY])
                 or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY])
             )
