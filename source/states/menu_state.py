@@ -46,15 +46,15 @@ def menu_cycle(roadfighter) -> int:
     elif roadfighter.menu_state == 2:
         if roadfighter.menu_redefining_key != -1:
             for key in roadfighter.keyboard.newly_pressed(roadfighter.old_keyboard):
-                if key not in (sdl2.SDLK_ESCAPE, const.GLOBAL_QUIT_KEY):
+                if key not in (const.GLOBAL_ESCAPE_KEY, const.GLOBAL_QUIT_KEY):
                     roadfighter.assign_redefined_key(key)
                 roadfighter.menu_redefining_key = -1
                 break
         else:
-            if roadfighter.keyboard[sdl2.SDLK_DOWN] and not roadfighter.old_keyboard[sdl2.SDLK_DOWN]:
+            if roadfighter.keyboard[roadfighter.down_key] and not roadfighter.old_keyboard[roadfighter.down_key]:
                 Sound_play(roadfighter.S_menu_move)
                 roadfighter.menu_item += 1
-            if roadfighter.keyboard[sdl2.SDLK_UP] and not roadfighter.old_keyboard[sdl2.SDLK_UP]:
+            if roadfighter.keyboard[roadfighter.up_key] and not roadfighter.old_keyboard[roadfighter.up_key]:
                 Sound_play(roadfighter.S_menu_move)
                 roadfighter.menu_item -= 1
             roadfighter.menu_item = max(0, min(roadfighter.menu_nitems - 1, roadfighter.menu_item))
@@ -65,7 +65,7 @@ def menu_cycle(roadfighter) -> int:
                 or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY])
             )
             if selecting:
-                if (roadfighter.keyboard[roadfighter.left_key] and not roadfighter.old_keyboard[roadfighter.left_key]) or (roadfighter.keyboard[sdl2.SDLK_ESCAPE] and not roadfighter.old_keyboard[sdl2.SDLK_ESCAPE]):
+                if (roadfighter.keyboard[roadfighter.left_key] and not roadfighter.old_keyboard[roadfighter.left_key]) or (roadfighter.keyboard[const.GLOBAL_ESCAPE_KEY] and not roadfighter.old_keyboard[const.GLOBAL_ESCAPE_KEY]):
                     roadfighter.menu_item = roadfighter.menu_nitems - 1
                 Sound_play(roadfighter.S_menu_select)
                 if roadfighter.menu_current_menu == 0:
