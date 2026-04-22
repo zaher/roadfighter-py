@@ -32,9 +32,7 @@ def GetTickCount() -> int:
 
 
 def pause(milliseconds: int) -> None:
-    start = GetTickCount()
-    while GetTickCount() - start < milliseconds:
-        pass
+    sdl2.SDL_Delay(milliseconds)
 
 
 def cos(value: float) -> float:

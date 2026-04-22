@@ -4,6 +4,7 @@ import sdl2
 import sdl2.sdlimage as sdlimage
 
 from .. import constants as const
+from ..auxiliar import surface_fader
 from ..filehandling import FileType, resolve_path
 from ..game import CGame
 from ..sound import Sound_create_music, Sound_music_volume, Sound_release_music
@@ -129,13 +130,16 @@ def interlevel_draw(roadfighter, screen) -> None:
         if fade < 1.0:
             roadfighter.fade_screen(screen, fade)
     elif roadfighter.interlevel_state in (3, 4) and roadfighter.levelintro_sfc is not None:
-        text_sfc = sdl2.SDL_ConvertSurfaceFormat(roadfighter.levelintro_sfc, sdl2.SDL_PIXELFORMAT_RGBA32, 0)
         fade = min(1.0, float(roadfighter.interlevel_timmer) / const.INTERLEVEL_TIME)
+        rect = roadfighter.make_rect(
+            (roadfighter.desired_scoreboard_x // 2) - (roadfighter.levelintro_sfc.contents.w // 2),
+            (roadfighter.screen_h // 2) - roadfighter.levelintro_sfc.contents.h,
+            roadfighter.levelintro_sfc.contents.w,
+            roadfighter.levelintro_sfc.contents.h,
+        )
+        sdl2.SDL_BlitSurface(roadfighter.levelintro_sfc, None, screen, rect)
         if fade < 1.0:
-            roadfighter.fade_surface(text_sfc, fade)
-        rect = roadfighter.make_rect((roadfighter.desired_scoreboard_x // 2) - (text_sfc.contents.w // 2), (roadfighter.screen_h // 2) - text_sfc.contents.h, text_sfc.contents.w, text_sfc.contents.h)
-        sdl2.SDL_BlitSurface(text_sfc, None, screen, rect)
-        sdl2.SDL_FreeSurface(text_sfc)
+            surface_fader(screen, fade, fade, fade, rect)
 
     if roadfighter.scoreboard_x == -1:
         roadfighter.scoreboard_x = roadfighter.screen_w

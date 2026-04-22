@@ -141,8 +141,27 @@ def surface_to_texture(surface, renderer):
 
 def present_surface(surface, renderer, screen_texture):
     """Present a surface using the GPU renderer."""
-    # Update texture with surface pixels
-    sdl2.SDL_UpdateTexture(screen_texture, None, surface.contents.pixels, surface.contents.pitch)
+    # Update texture with surface pixels using LockTexture for zero-copy upload
+    import ctypes
+
+    pixels = ctypes.c_void_p()
+    pitch = ctypes.c_int()
+    if sdl2.SDL_LockTexture(screen_texture, None, ctypes.byref(pixels), ctypes.byref(pitch)) == 0:
+        src_pixels = surface.contents.pixels
+        src_pitch = surface.contents.pitch
+        h = surface.contents.h
+        if pitch.value == src_pitch:
+            ctypes.memmove(pixels, src_pixels, src_pitch * h)
+        else:
+            row_size = min(pitch.value, src_pitch)
+            dst_addr = ctypes.cast(pixels, ctypes.c_void_p).value or 0
+            src_addr = ctypes.cast(src_pixels, ctypes.c_void_p).value or 0
+            for y in range(h):
+                ctypes.memmove(dst_addr + y * pitch.value, src_addr + y * src_pitch, row_size)
+        sdl2.SDL_UnlockTexture(screen_texture)
+    else:
+        # Fallback to SDL_UpdateTexture if locking fails
+        sdl2.SDL_UpdateTexture(screen_texture, None, surface.contents.pixels, surface.contents.pitch)
 
     # Clear and render
     sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255)

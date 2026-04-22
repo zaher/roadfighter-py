@@ -9,7 +9,7 @@ import sdl2.sdlimage as sdlimage
 import sdl2.sdlttf as sdlttf
 
 from . import constants as const
-from .auxiliar import multiline_text_surface2, sge_transform, surface_fader
+from .auxiliar import create_rgb_surface, multiline_text_surface2, sge_transform, surface_fader
 from .configuration import Configuration, default_configuration, load_configuration, save_configuration
 from .filehandling import FileType, resolve_path
 from .game import CGame
@@ -78,6 +78,7 @@ class RoadFighter:
         self.menu_credits_timmer = 0
         self._menu_surface_cache = {}
         self._score_surface_cache = {}
+        self._bar_surface_cache = {}
 
         self.game_mode = {"a": 0, "b": 1, "c": 2}.get(level_type, 0) if level_type else 0
         self.n_players = 1
@@ -227,6 +228,16 @@ class RoadFighter:
         if self.game is not None:
             self.game.close()
             self.game = None
+        for sfc in self._bar_surface_cache.values():
+            sdl2.SDL_FreeSurface(sfc)
+        self._bar_surface_cache.clear()
+        for sfc in self._score_surface_cache.values():
+            sdl2.SDL_FreeSurface(sfc)
+        self._score_surface_cache.clear()
+        for title_sfc, options_sfc, _y_inc, _y_start in self._menu_surface_cache.values():
+            sdl2.SDL_FreeSurface(title_sfc)
+            sdl2.SDL_FreeSurface(options_sfc)
+        self._menu_surface_cache.clear()
 
     def draw(self, screen) -> None:
         if self.state_timmer == 0:
@@ -243,6 +254,24 @@ class RoadFighter:
             interlevel_draw(self, screen)
         elif self.state == const.GAMEOVER_STATE:
             gameover_draw(self, screen)
+
+    def _get_bar_surface(self, width: int, height: int, color: tuple[int, int, int]):
+        key = (width, height, color)
+        sfc = self._bar_surface_cache.get(key)
+        if sfc is None:
+            sfc = create_rgb_surface(width, height)
+            sdl2.SDL_FillRect(sfc, None, sdl2.SDL_MapRGB(sfc.contents.format, 0, 0, 0))
+            mapped = sdl2.SDL_MapRGB(sfc.contents.format, *color)
+            for row in range(height - 1, -1, -2):
+                rect = sdl2.SDL_Rect(0, row, width, 1)
+                sdl2.SDL_FillRect(sfc, rect, mapped)
+            if len(self._bar_surface_cache) >= 100:
+                keys = list(self._bar_surface_cache.keys())
+                for k in keys[:50]:
+                    old = self._bar_surface_cache.pop(k)
+                    sdl2.SDL_FreeSurface(old)
+            self._bar_surface_cache[key] = sfc
+        return sfc
 
     def scoreboard_draw(self, x: int, y: int, screen) -> None:
         if self.scoreboard_sfc is None:
@@ -261,18 +290,20 @@ class RoadFighter:
             for j, speed in enumerate(reversed(speeds)):
                 height = int(112 * (float(-speed) / const.MAX_SPEED))
                 width = (33 - len(speeds)) // max(1, len(speeds))
-                for row in range(367, 367 - height, -2):
-                    bar = self.make_rect((x + 28) + (width + 1) * j, row, width, 1)
-                    sdl2.SDL_FillRect(screen, bar, sdl2.SDL_MapRGB(screen.contents.format, 255, 255, 255))
+                if height > 0 and width > 0:
+                    bar_sfc = self._get_bar_surface(width, height, (255, 255, 255))
+                    bar_rect = self.make_rect((x + 28) + (width + 1) * j, 367 - height, width, height)
+                    sdl2.SDL_BlitSurface(bar_sfc, None, screen, bar_rect)
 
             fuels = []
             self.game.get_fuels(self.wrap_list(fuels))
             for j, fuel in enumerate(reversed(fuels)):
                 height = int(112 * (float(fuel) / const.MAX_FUEL))
                 width = (33 - len(fuels)) // max(1, len(fuels))
-                for row in range(367, 367 - height, -2):
-                    bar = self.make_rect((x + 76) + (width + 1) * j, row, width, 1)
-                    sdl2.SDL_FillRect(screen, bar, sdl2.SDL_MapRGB(screen.contents.format, 255, 255, 255))
+                if height > 0 and width > 0:
+                    bar_sfc = self._get_bar_surface(width, height, (255, 255, 255))
+                    bar_rect = self.make_rect((x + 76) + (width + 1) * j, 367 - height, width, height)
+                    sdl2.SDL_BlitSurface(bar_sfc, None, screen, bar_rect)
 
         if self.scoreboard2_sfc is not None:
             minimap_rect = self.make_rect(self.scoreboard_x + 41, 97, 55, 143)
@@ -309,6 +340,11 @@ class RoadFighter:
         sfc = self._score_surface_cache.get(key)
         if sfc is None:
             sfc = sdlttf.TTF_RenderUTF8_Blended(self.font1, text.encode("utf-8"), sdl2.SDL_Color(*color, 255))
+            if len(self._score_surface_cache) >= 200:
+                keys = list(self._score_surface_cache.keys())
+                for k in keys[:100]:
+                    old = self._score_surface_cache.pop(k)
+                    sdl2.SDL_FreeSurface(old)
             self._score_surface_cache[key] = sfc
         rect = self.make_rect(x - sfc.contents.w, y, sfc.contents.w, sfc.contents.h)
         sdl2.SDL_BlitSurface(sfc, None, screen, rect)
@@ -523,6 +559,12 @@ class RoadFighter:
                 y_inc = 4 + const.FONT_SIZE
                 y_start = 10
             cached = (title_surface, options_surface, y_inc, y_start)
+            if len(self._menu_surface_cache) >= 20:
+                keys = list(self._menu_surface_cache.keys())
+                for k in keys[:10]:
+                    old = self._menu_surface_cache.pop(k)
+                    sdl2.SDL_FreeSurface(old[0])
+                    sdl2.SDL_FreeSurface(old[1])
             self._menu_surface_cache[cache_key] = cached
         title_surface, options_surface, y_inc, y_start = cached
 
