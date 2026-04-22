@@ -34,6 +34,13 @@ def initialize_sdl(fullscreen: bool, debug: bool = False):
     elif mappings_loaded < 0:
         debug_print(f"Warning: Failed to load game controller mappings from {mapping_file.decode()}")
 
+    mapping_file = b"./mapping/usercontrollerdb.txt"
+    mappings_loaded = sdl2.SDL_GameControllerAddMappingsFromFile(mapping_file)
+    if mappings_loaded > 0:
+        debug_print(f"Loaded {mappings_loaded} user controller mappings from {mapping_file.decode()}")
+    elif mappings_loaded < 0:
+        debug_print(f"Warning: Failed to load user controller mappings from {mapping_file.decode()}")
+
     # Initialize controllers if available
     # Stores tuples of (controller_pointer, instance_id, is_gamecontroller)
     controllers = []

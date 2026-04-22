@@ -1,0 +1,2 @@
+030041bdbc2000006055000000000000,GAME BOX JOYSTICK,platform:Windows,crc:bd41,a:b0,b:b1,x:b3,y:b4,back:b10,start:b11,leftstick:b13,rightstick:b14,leftshoulder:b6,rightshoulder:b7,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,misc1:b12,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:b8,righttrigger:b9,
+03004913100800000200000000000000,Twin USB Gamepad,platform:Windows,crc:1349,a:b2,b:b1,x:b3,y:b0,back:b8,start:b9,leftshoulder:b4,rightshoulder:b5,dpup:-a3,dpdown:+a3,dpleft:-a2,dpright:+a2,lefttrigger:b6,righttrigger:b7,
