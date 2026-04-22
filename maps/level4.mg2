@@ -1,151 +1,151 @@
 TILE_SOURCES 6
-graphics/road.bmp
-graphics/level1.bmp
-graphics/semaphore.bmp
-graphics/level2.bmp
-graphics/level3.bmp
-graphics/level4.bmp
+graphics/road.png
+graphics/level1.png
+graphics/semaphore.png
+graphics/level2.png
+graphics/level3.png
+graphics/level4.png
 TILES 13
-graphics/road.bmp
+graphics/road.png
 0 0 48 128
 2 0
-graphics/road.bmp
+graphics/road.png
 144 0 64 128
 2 0
-graphics/road.bmp
+graphics/road.png
 336 0 64 128
 2 0
-graphics/road.bmp
+graphics/road.png
 0 128 32 128
 2 2
-graphics/road.bmp
+graphics/road.png
 96 128 32 128
 2 2
-graphics/road.bmp
+graphics/road.png
 192 128 32 128
 2 2
-graphics/road.bmp
+graphics/road.png
 288 128 32 128
 2 2
-graphics/road.bmp
+graphics/road.png
 192 256 32 128
 2 2
-graphics/road.bmp
+graphics/road.png
 288 256 32 128
 2 2
-graphics/road.bmp
+graphics/road.png
 0 256 32 128
 2 2
-graphics/road.bmp
+graphics/road.png
 96 256 32 128
 2 2
-graphics/road.bmp
+graphics/road.png
 400 128 40 128
 2 2
-graphics/road.bmp
+graphics/road.png
 400 256 64 128
 2 2
 TILES 19
-graphics/level1.bmp
+graphics/level1.png
 0 0 128 128
 2 0
-graphics/level1.bmp
+graphics/level1.png
 0 128 128 32
 2 0
-graphics/level1.bmp
+graphics/level1.png
 0 160 128 32
 2 0
-graphics/level1.bmp
+graphics/level1.png
 0 192 128 32
 2 0
-graphics/level1.bmp
+graphics/level1.png
 256 0 32 32
 2 0
-graphics/level1.bmp
+graphics/level1.png
 256 32 32 80
 2 0
-graphics/level1.bmp
+graphics/level1.png
 320 0 96 80
 2 0
-graphics/level1.bmp
+graphics/level1.png
 320 80 96 32
 2 0
-graphics/level1.bmp
+graphics/level1.png
 256 112 96 112
 2 0
-graphics/level1.bmp
+graphics/level1.png
 0 224 48 128
 2 0
-graphics/level1.bmp
+graphics/level1.png
 96 224 64 112
 2 0
-graphics/level1.bmp
+graphics/level1.png
 224 224 128 128
 2 0
-graphics/level1.bmp
+graphics/level1.png
 0 352 96 96
 2 0
-graphics/level1.bmp
+graphics/level1.png
 192 352 112 112
 2 0
-graphics/semaphore.bmp
+graphics/semaphore.png
 0 0 36 72
 2 0
-graphics/semaphore.bmp
+graphics/semaphore.png
 0 72 36 72
 2 0
-graphics/semaphore.bmp
+graphics/semaphore.png
 0 144 36 72
 2 0
-graphics/semaphore.bmp
+graphics/semaphore.png
 0 216 36 72
 2 0
-graphics/semaphore.bmp
+graphics/semaphore.png
 0 288 36 72
 2 0
 TILES 8
-graphics/level2.bmp
+graphics/level2.png
 0 0 128 128
 2 0
-graphics/level2.bmp
+graphics/level2.png
 416 0 64 384
 2 0
-graphics/level2.bmp
+graphics/level2.png
 160 128 64 128
 2 0
-graphics/level2.bmp
+graphics/level2.png
 160 256 96 128
 2 0
-graphics/level2.bmp
+graphics/level2.png
 256 0 80 112
 2 0
-graphics/level2.bmp
+graphics/level2.png
 0 128 48 64
 2 0
-graphics/level2.bmp
+graphics/level2.png
 0 192 80 128
 2 0
-graphics/level2.bmp
+graphics/level2.png
 0 320 80 112
 2 0
 TILES 3
-graphics/level3.bmp
+graphics/level3.png
 0 0 128 96
 2 0
-graphics/level3.bmp
+graphics/level3.png
 0 96 64 96
 2 0
-graphics/level3.bmp
+graphics/level3.png
 0 192 64 96
 2 0
 TILES 3
-graphics/level4.bmp
+graphics/level4.png
 0 0 88 592
 2 0
-graphics/level4.bmp
+graphics/level4.png
 176 0 72 592
 2 0
-graphics/level4.bmp
+graphics/level4.png
 320 0 128 128
 2 0
 TILES 0

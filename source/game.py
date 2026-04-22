@@ -251,32 +251,32 @@ class CGame:
         self.init_quick_tables()
         self.font = TTF_OpenFont(str(resolve_path("fonts/tanglewo.ttf", FileType.GAMEDATA)).encode("utf-8"), 16)
 
-        self.player1_car = _load_image("graphics/car1.bmp")
-        self.player2_car = _load_image("graphics/car2.bmp")
+        self.player1_car = _load_image("graphics/car1.png")
+        self.player2_car = _load_image("graphics/car2.png")
         for start in range(0, 288, 32):
             self.player_tiles.append(CTile(0, start, 32, 32, self.player1_car, True))
         for start in range(0, 288, 32):
             self.player_tiles.append(CTile(0, start, 32, 32, self.player2_car, True))
 
-        self.enemy_cars = _load_image("graphics/enemycars.bmp")
+        self.enemy_cars = _load_image("graphics/enemycars.png")
         self.enemy_tiles.append(CTile(0, 0, 32, 32, self.enemy_cars, True))
         self.enemy_tiles.append(CTile(0, 32, 32, 32, self.enemy_cars, True))
         self.enemy_tiles.append(CTile(0, 64, 32, 32, self.enemy_cars, True))
         self.enemy_tiles.append(CTile(0, 96, 32, 64, self.enemy_cars, True))
 
-        self.fuel_sfc = _load_image("graphics/fuel.bmp")
+        self.fuel_sfc = _load_image("graphics/fuel.png")
         if self.start_delay != DEFAULT_START_DELAY:
             for offset_y in (176, 224, 272, 320, 368):
                 self.objects.Add(CEnemyRacerCarObject((self.dx // 2) - 30, self.dy - offset_y, self.enemy_tiles[0], self.start_delay, self))
                 self.objects.Add(CEnemyRacerCarObject((self.dx // 2) + 14, self.dy - offset_y, self.enemy_tiles[0], self.start_delay, self))
 
-        self.empty_sfc = _load_image("graphics/empty.bmp")
-        self.fuelscores_sfc = _load_image("graphics/fuel_scores.bmp")
-        self.checkpoint_sfc = _load_image("graphics/checkpoint.bmp")
-        self.goal_sfc = _load_image("graphics/goal.bmp")
-        self.obstacles_sfc = _load_image("graphics/obstacles.bmp")
-        self.pause_sfc = _load_image("graphics/pause.bmp")
-        self.explosion_sfc = _load_image("graphics/explosion.bmp")
+        self.empty_sfc = _load_image("graphics/empty.png")
+        self.fuelscores_sfc = _load_image("graphics/fuel_scores.png")
+        self.checkpoint_sfc = _load_image("graphics/checkpoint.png")
+        self.goal_sfc = _load_image("graphics/goal.png")
+        self.obstacles_sfc = _load_image("graphics/obstacles.png")
+        self.pause_sfc = _load_image("graphics/pause.png")
+        self.explosion_sfc = _load_image("graphics/explosion.png")
 
         self.extra_tiles.append(CTile(0, 0, 32, 32, self.fuel_sfc, True))
         self.extra_tiles.append(CTile(0, 0, self.empty_sfc.contents.w // 2, self.empty_sfc.contents.h, self.empty_sfc, False))
