@@ -464,10 +464,5 @@ class CPlayerCarObject(CCarObject):
         a, b, c, d = self.tyre_coordinates(self.rotating_angle)
         e, f, g, h = self.tyre_coordinates(self.old_angle)
 
-        first_mark = self.game.create_tyre_mark(self.x + e, self.y + f, self.compute_next_x() + a, self.compute_next_y() + b)
-        if first_mark is not None:
-            self.game.tyre_marks.Add(first_mark)
-
-        second_mark = self.game.create_tyre_mark(self.x + g, self.y + h, self.compute_next_x() + c, self.compute_next_y() + d)
-        if second_mark is not None:
-            self.game.tyre_marks.Add(second_mark)
+        self.game.create_tyre_mark(self.x + e, self.y + f, self.compute_next_x() + a, self.compute_next_y() + b)
+        self.game.create_tyre_mark(self.x + g, self.y + h, self.compute_next_x() + c, self.compute_next_y() + d)

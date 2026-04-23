@@ -137,8 +137,6 @@ class CGame:
         self.foreground = List[CObject]()
         self.tyre_marks = List[CTyreMark]()
         self.tyre_marks_surface = None
-        self.tyre_marks_surface_dirty = True
-        self._tyre_marks_count = 0
 
         self.quick_background = [List[CObject]() for _ in range(QUICK_PARTS)]
         self.quick_middleground = [List[CObject]() for _ in range(QUICK_PARTS)]
@@ -404,7 +402,16 @@ class CGame:
         if y == y2:
             return None
         mark = CTyreMark(x, y, x2, y2)
-        self.tyre_marks_surface_dirty = True
+
+        # Incremental draw: add directly to the persistent surface instead
+        # of rebuilding from scratch every frame. This avoids O(n^2) cost
+        # as tyre marks accumulate during a long skid.
+        if self.tyre_marks_surface is None:
+            self.tyre_marks_surface = create_rgb_surface(self.dx, self.dy)
+            sdl2.SDL_SetSurfaceBlendMode(self.tyre_marks_surface, sdl2.SDL_BLENDMODE_BLEND)
+        draw_line(self.tyre_marks_surface, x, y, x2, y2, 0xFF000000)
+        draw_line(self.tyre_marks_surface, x + 1, y, x2 + 1, y2, 0xFF000000)
+
         return mark
 
     def load_map(self, mapname: str) -> bool:
@@ -688,21 +695,7 @@ class CGame:
             for obj in self.quick_middleground[i]:
                 obj.draw(sx, sy, surface)
 
-        if self.game_remake_extras and self.tyre_marks.Length() > 0:
-            # Use cached tyre marks surface for better performance
-            current_count = self.tyre_marks.Length()
-            if self.tyre_marks_surface_dirty or self.tyre_marks_surface is None or current_count != self._tyre_marks_count:
-                # Rebuild cached surface when tyre marks change
-                if self.tyre_marks_surface is not None:
-                    sdl2.SDL_FreeSurface(self.tyre_marks_surface)
-                self.tyre_marks_surface = create_rgb_surface(self.dx, self.dy)
-                sdl2.SDL_SetSurfaceBlendMode(self.tyre_marks_surface, sdl2.SDL_BLENDMODE_BLEND)
-                for tyre_mark in self.tyre_marks:
-                    draw_line(self.tyre_marks_surface, tyre_mark.x, tyre_mark.y, tyre_mark.x2, tyre_mark.y2, 0xFF000000)
-                    draw_line(self.tyre_marks_surface, tyre_mark.x + 1, tyre_mark.y, tyre_mark.x2 + 1, tyre_mark.y2, 0xFF000000)
-                self.tyre_marks_surface_dirty = False
-                self._tyre_marks_count = current_count
-            # Blit cached surface
+        if self.game_remake_extras and self.tyre_marks_surface is not None:
             rect = SDL_Rect(-sx, -sy, self.dx, self.dy)
             sdl2.SDL_BlitSurface(self.tyre_marks_surface, None, surface, byref(rect))
 
