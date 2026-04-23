@@ -36,6 +36,7 @@ from ..sound import (
     EngineSound_update,
 )
 from .explosion_object import CExplosionObject
+from .particle_explosion_object import CParticleExplosion
 
 EXPLOSION_TILES = 1
 
@@ -188,6 +189,9 @@ class CPlayerCarObject(CCarObject):
         elif self.state == 4:
             if self.state_timmer == 0:
                 self.game.objects.Add(CExplosionObject(self.x - 16, self.y - 32, self.game.explosion_tiles, 0, 11, self.game))
+                cx = self.x + self.get_dx() // 2
+                cy = self.y + self.get_dy() // 2
+                self.game.objects.Add(CParticleExplosion(cx, cy, self.game))
             self.rotating_angle = 0
             self.next_bonus = 300
             self.x_speed = 0

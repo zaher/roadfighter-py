@@ -5,6 +5,7 @@ from __future__ import annotations
 from ..constants import CONSTITUTION_CAR, CONSTITUTION_SOLID, ENEMY_HSPEED, ENEMY_SPEED, PLAYING_WINDOW
 from ..object import CCarObject
 from .explosion_object import CExplosionObject
+from .particle_explosion_object import CParticleExplosion
 
 
 class CEnemyCarObject(CCarObject):
@@ -72,7 +73,10 @@ class CEnemyCarObject(CCarObject):
 
             other = self.game.object_collision(0, 0, self, CONSTITUTION_SOLID)
             if other is not None and other.constitution_test(CONSTITUTION_CAR):
+                cx = self.x + self.get_dx() // 2
+                cy = self.y + self.get_dy() // 2
                 self.game.objects.Add(CExplosionObject(self.x - 16, self.y - 32, self.game.explosion_tiles, 0, 11, self.game))
+                self.game.objects.Add(CParticleExplosion(cx, cy, self.game))
                 return False
 
             other = self.game.object_collision(0, 0, self, CONSTITUTION_CAR)
