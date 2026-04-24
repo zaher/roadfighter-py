@@ -152,6 +152,7 @@ class RoadFighter:
         self.fire2_key = cfg.fire2_key
 
         self.game_remake_extras = cfg.game_remake_extras
+        self.fuel_factor = cfg.fuel_factor
 
         # Initialize joystick mapping
         self.update_joystick_mapping()
@@ -494,6 +495,7 @@ class RoadFighter:
                 down2_key=self.down2_key,
                 fire2_key=self.fire2_key,
                 game_remake_extras=self.game_remake_extras,
+                fuel_factor=self.fuel_factor,
             )
         )
 

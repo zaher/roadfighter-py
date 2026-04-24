@@ -159,10 +159,11 @@ class CGame:
 
         self.init_game(mapname)
 
-        if len(args) == 6:
-            left_key, right_key, fire_key, score, current_level, extras = args
+        if len(args) == 7:
+            left_key, right_key, fire_key, score, current_level, extras, fuel_factor = args
             self.current_level = current_level
             self.game_remake_extras = extras
+            self.fuel_factor = fuel_factor
             if self.start_delay != DEFAULT_START_DELAY:
                 self.objects.Add(CEnemyRacerCarObject((self.dx // 2) + 14, self.dy - 128, self.enemy_tiles[0], self.start_delay, self))
             player = CPlayerCarObject((self.dx // 2) - 30, self.dy - 128, self.player_tiles, 0, 8, left_key, right_key, fire_key, score, self.start_delay + 8, self)
@@ -172,10 +173,11 @@ class CGame:
             self.focusing_fy.Add(0.66)
             self.focusing_next_car.Add(const.CAR_INTERVAL)
             self.focusing_next_car_index.Add(0)
-        elif len(args) == 10:
-            left_key1, right_key1, fire_key1, left_key2, right_key2, fire_key2, score1, score2, current_level, extras = args
+        elif len(args) == 11:
+            left_key1, right_key1, fire_key1, left_key2, right_key2, fire_key2, score1, score2, current_level, extras, fuel_factor = args
             self.current_level = current_level
             self.game_remake_extras = extras
+            self.fuel_factor = fuel_factor
 
             player1 = CPlayerCarObject((self.dx // 2) - 30, self.dy - 128, self.player_tiles, 0, 8, left_key1, right_key1, fire_key1, score1, self.start_delay + 8, self)
             self.objects.Add(player1)
