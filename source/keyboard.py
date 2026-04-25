@@ -65,7 +65,7 @@ class KeyboardState:
             if axis == 0:  # X axis
                 self._pressed[JOY_LEFT] = value < -JOY_deadzone
                 self._pressed[JOY_RIGHT] = value > JOY_deadzone
-            else: #elif axis == 1:  # Y axis # any number of axis is Y, i have joystick UP and DOWN is 3
+            elif axis == 1:  # Y axis
                 self._pressed[JOY_UP] = value < -JOY_deadzone
                 self._pressed[JOY_DOWN] = value > JOY_deadzone
         else:
@@ -73,7 +73,7 @@ class KeyboardState:
                 self._pressed[JOY2_LEFT] = value < -JOY_deadzone
                 self._pressed[JOY2_RIGHT] = value > JOY_deadzone
 
-            else: #elif axis == 1:  # Y axis , read above
+            elif axis == 1:  # Y axis , read above
                 self._pressed[JOY2_UP] = value < -JOY_deadzone
                 self._pressed[JOY2_DOWN] = value > JOY_deadzone
 
@@ -93,6 +93,7 @@ class KeyboardState:
             if button == sdl2.SDL_CONTROLLER_BUTTON_A or button == 0:
                 self._pressed[JOY_FIRE] = pressed
             elif button == sdl2.SDL_CONTROLLER_BUTTON_B or button == 1:
+                #self._pressed[JOY_BREAK] = pressed
                 self._pressed[JOY_SELECT] = pressed
             # Also support START/BACK buttons on controllers
             elif button == sdl2.SDL_CONTROLLER_BUTTON_START:
@@ -101,9 +102,14 @@ class KeyboardState:
             if button == sdl2.SDL_CONTROLLER_BUTTON_A or button == 0:
                 self._pressed[JOY2_FIRE] = pressed
             elif button == sdl2.SDL_CONTROLLER_BUTTON_B or button == 1:
+                #self._pressed[JOY2_BREAK] = pressed
                 self._pressed[JOY2_SELECT] = pressed
+            elif button == sdl2.SDL_CONTROLLER_BUTTON_BACK:
+                self._pressed[JOY2_ESCAPE] = pressed
+                self._pressed[GLOBAL_ESCAPE_KEY] = pressed
             elif button == sdl2.SDL_CONTROLLER_BUTTON_START:
                 self._pressed[JOY2_SELECT] = pressed
+                self._pressed[GLOBAL_SELECT_KEY] = pressed
 
     def set_joy_hat(self, which: int, hat: int, value: int) -> None:
         """Handle joystick hat/d-pad motion.

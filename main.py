@@ -27,14 +27,14 @@ def initialize_sdl(fullscreen: bool, debug: bool = False):
         raise RuntimeError("SDL_Init failed")
 
     # Load game controller mappings from file
-    mapping_file = b"./mapping/gamecontrollerdb.txt"
+    mapping_file = b"./controller/gamecontrollerdb.txt"
     mappings_loaded = sdl2.SDL_GameControllerAddMappingsFromFile(mapping_file)
     if mappings_loaded > 0:
         debug_print(f"Loaded {mappings_loaded} game controller mappings from {mapping_file.decode()}")
     elif mappings_loaded < 0:
         debug_print(f"Warning: Failed to load game controller mappings from {mapping_file.decode()}")
 
-    mapping_file = b"./mapping/usercontrollerdb.txt"
+    mapping_file = b"./controller/usercontrollerdb.txt"
     mappings_loaded = sdl2.SDL_GameControllerAddMappingsFromFile(mapping_file)
     if mappings_loaded > 0:
         debug_print(f"Loaded {mappings_loaded} user controller mappings from {mapping_file.decode()}")

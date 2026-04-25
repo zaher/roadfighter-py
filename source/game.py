@@ -87,7 +87,23 @@ def _load_image(relative_path: str):
 
 
 class CGame:
-    def __init__(self, mapname: str, mode: int, *args):
+    def __init__(
+        self,
+        mapname: str,
+        mode: int,
+        n_players: int,
+        left_key: int,
+        right_key: int,
+        fire_key: int,
+        score: int,
+        current_level: int,
+        extras: bool,
+        fuel_factor: float,
+        left_key2: int = 0,
+        right_key2: int = 0,
+        fire_key2: int = 0,
+        score2: int = 0,
+    ) -> None:
         self.dx = 0
         self.dy = 0
         self.game_state = 0
@@ -157,13 +173,13 @@ class CGame:
         self.esc_pressed = False
         self.backspace_pressed = False
 
+        self.fuel_factor = fuel_factor
         self.init_game(mapname)
 
-        if len(args) == 7:
-            left_key, right_key, fire_key, score, current_level, extras, fuel_factor = args
-            self.current_level = current_level
-            self.game_remake_extras = extras
-            self.fuel_factor = fuel_factor
+        self.current_level = current_level
+        self.game_remake_extras = extras
+
+        if n_players == 1:
             if self.start_delay != DEFAULT_START_DELAY:
                 self.objects.Add(CEnemyRacerCarObject((self.dx // 2) + 14, self.dy - 128, self.enemy_tiles[0], self.start_delay, self))
             player = CPlayerCarObject((self.dx // 2) - 30, self.dy - 128, self.player_tiles, 0, 8, left_key, right_key, fire_key, score, self.start_delay + 8, self)
@@ -173,13 +189,8 @@ class CGame:
             self.focusing_fy.Add(0.66)
             self.focusing_next_car.Add(const.CAR_INTERVAL)
             self.focusing_next_car_index.Add(0)
-        elif len(args) == 11:
-            left_key1, right_key1, fire_key1, left_key2, right_key2, fire_key2, score1, score2, current_level, extras, fuel_factor = args
-            self.current_level = current_level
-            self.game_remake_extras = extras
-            self.fuel_factor = fuel_factor
-
-            player1 = CPlayerCarObject((self.dx // 2) - 30, self.dy - 128, self.player_tiles, 0, 8, left_key1, right_key1, fire_key1, score1, self.start_delay + 8, self)
+        elif n_players == 2:
+            player1 = CPlayerCarObject((self.dx // 2) - 30, self.dy - 128, self.player_tiles, 0, 8, left_key, right_key, fire_key, score, self.start_delay + 8, self)
             self.objects.Add(player1)
             self.focusing_objects.Add(player1)
             self.checkpoint_delay.Add(-1)
@@ -319,6 +330,10 @@ class CGame:
             const.FUEL_RECHARGE = 200
             const.FUEL_LOSS = 100
             const.CAR_INTERVAL = 12
+
+        const.MAX_FUEL = int(const.MAX_FUEL * self.fuel_factor)
+        const.FUEL_RECHARGE = int(const.FUEL_RECHARGE * self.fuel_factor)
+        const.FUEL_LOSS = int(const.FUEL_LOSS * self.fuel_factor)
 
         self.S_takefuel = Sound_create_sound("sound/takefuel")
         self.S_redlight = Sound_create_sound("sound/redlight")

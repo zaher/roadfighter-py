@@ -84,6 +84,7 @@ def menu_cycle(roadfighter) -> int:
                         roadfighter.right2_key = cfg.right2_key
                         roadfighter.fire2_key = cfg.fire2_key
                         roadfighter.game_remake_extras = cfg.game_remake_extras
+                        roadfighter.fuel_factor = cfg.fuel_factor
                     if roadfighter.menu_item in (0, 1, 4):
                         roadfighter.menu_state = 3
                         roadfighter.menu_timmer = const.TEXT_EFFECT_LENGTH

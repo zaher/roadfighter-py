@@ -67,7 +67,7 @@ class CPlayerCarObject(CCarObject):
         self.old_angle = 0
         self.rotating_angle = 0
         self.constitution = CONSTITUTION_PLAYER | CONSTITUTION_CAR
-        self.fuel = int(const.MAX_FUEL * self.game.fuel_factor)
+        self.fuel = const.MAX_FUEL
         self.score = score
         self.left_key = lk
         self.right_key = rk

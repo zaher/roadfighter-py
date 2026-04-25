@@ -54,11 +54,48 @@ def interlevel_cycle(roadfighter) -> int:
         map_name = const.MAPS[roadfighter.current_level - 1]
         if roadfighter.n_players == 1:
             if roadfighter.is_player2:
-                roadfighter.game = CGame(map_name, roadfighter.game_mode, roadfighter.left2_key, roadfighter.right2_key, roadfighter.fire2_key, score2, roadfighter.current_level, roadfighter.game_remake_extras, roadfighter.fuel_factor)
+                roadfighter.game = CGame(
+                    mapname=map_name,
+                    mode=roadfighter.game_mode,
+                    n_players=1,
+                    left_key=roadfighter.left2_key,
+                    right_key=roadfighter.right2_key,
+                    fire_key=roadfighter.fire2_key,
+                    score=score2,
+                    current_level=roadfighter.current_level,
+                    extras=roadfighter.game_remake_extras,
+                    fuel_factor=roadfighter.fuel_factor,
+                )
             else:
-                roadfighter.game = CGame(map_name, roadfighter.game_mode, roadfighter.left_key, roadfighter.right_key, roadfighter.fire_key, score1, roadfighter.current_level, roadfighter.game_remake_extras, roadfighter.fuel_factor)
+                roadfighter.game = CGame(
+                    mapname=map_name,
+                    mode=roadfighter.game_mode,
+                    n_players=1,
+                    left_key=roadfighter.left_key,
+                    right_key=roadfighter.right_key,
+                    fire_key=roadfighter.fire_key,
+                    score=score1,
+                    current_level=roadfighter.current_level,
+                    extras=roadfighter.game_remake_extras,
+                    fuel_factor=roadfighter.fuel_factor,
+                )
         else:
-            roadfighter.game = CGame(map_name, roadfighter.game_mode, roadfighter.left_key, roadfighter.right_key, roadfighter.fire_key, roadfighter.left2_key, roadfighter.right2_key, roadfighter.fire2_key, score1, score2, roadfighter.current_level, roadfighter.game_remake_extras, roadfighter.fuel_factor)
+            roadfighter.game = CGame(
+                mapname=map_name,
+                mode=roadfighter.game_mode,
+                n_players=2,
+                left_key=roadfighter.left_key,
+                right_key=roadfighter.right_key,
+                fire_key=roadfighter.fire_key,
+                score=score1,
+                left_key2=roadfighter.left2_key,
+                right_key2=roadfighter.right2_key,
+                fire_key2=roadfighter.fire2_key,
+                score2=score2,
+                current_level=roadfighter.current_level,
+                extras=roadfighter.game_remake_extras,
+                fuel_factor=roadfighter.fuel_factor,
+            )
 
         roadfighter.interlevel_state = 0
         roadfighter.interlevel_timmer = 0
