@@ -124,6 +124,21 @@ The replay system records all keyboard inputs along with the random seed, allowi
 This is a remake of the original Road Fighter by Konami. The original code was open-sourced and has been ported to modern Python/SDL.
 
 
+## Done
+
+- Joystick & GameController support (2 players, auto-detect, custom mappings via `gamecontrollerdb.txt`)
+- Keyboard + joystick active by default from first run
+- Configuration & key bindings saved in INI format (human-readable key names)
+- Menu improvements: glowing selected item, arrow positioning, full-screen toggle, removed redundant Extras option
+- Graphics optimizations: converted BMP to PNG, SDL2-based rotation/scaling, shader effects, glowing text, hidden cursor during race
+- Sound effects: looping car engine with pitch shifting, optimized skid sounds, horn on Select button
+- Visual effects: explosion particles (yellow, orange, red fire), skid wheel marks (lag-optimized)
+- Replay system: record/load replays from command line (`--record-replay`, `--load-replay`)
+- Command-line options: level number (1-6), level type (`-l a/b/c`), debug mode (`--debug`)
+- Input fixes: proper Fire key mapping, Up/Down/Back navigation, hat motion support
+- Configurable fuel factor via config file
+- General performance improvements and bug fixes
+
 ## Resources
 
 [Horn sound](https://cdn.pixabay.com/download/audio/2023/06/11/audio_1777c08c36.mp3?filename=universfield-automobile-horn-153260.mp3)
