@@ -153,6 +153,8 @@ class RoadFighter:
 
         self.game_remake_extras = cfg.game_remake_extras
         self.fuel_factor = cfg.fuel_factor
+        self.fullscreen = cfg.fullscreen
+        self.request_toggle_fullscreen = False
 
         # Initialize joystick mapping
         self.update_joystick_mapping()
@@ -398,8 +400,9 @@ class RoadFighter:
         elif self.menu_current_menu == 1:
             self.menu_tittle_text = "OPTIONS:"
             extras = "ON" if self.game_remake_extras else "OFF"
-            self.menu_options_text = f"PLAYER 1 KEYS\nPLAYER 2 KEYS\nEXTRAS: {extras}\nDEFAULT\nBACK\n"
-            self.menu_nitems = 5
+            fs = "ON" if self.fullscreen else "OFF"
+            self.menu_options_text = f"PLAYER 1 KEYS\nPLAYER 2 KEYS\nEXTRAS: {extras}\nFULL SCREEN: {fs}\nDEFAULT\nBACK\n"
+            self.menu_nitems = 6
         elif self.menu_current_menu == 2:
             self.menu_tittle_text = "PLAYER 1:"
             self.menu_options_text = (
@@ -458,7 +461,7 @@ class RoadFighter:
                 self.menu_state = 1
                 self.menu_timmer = 0
                 self.menu_current_menu = 3
-            elif self.menu_item == 4:
+            elif self.menu_item == 5:
                 self.menu_state = 1
                 self.menu_timmer = 0
                 self.menu_current_menu = 0
@@ -496,6 +499,7 @@ class RoadFighter:
                 fire2_key=self.fire2_key,
                 game_remake_extras=self.game_remake_extras,
                 fuel_factor=self.fuel_factor,
+                fullscreen=self.fullscreen,
             )
         )
 

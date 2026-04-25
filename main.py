@@ -10,6 +10,7 @@ import sdl2.sdlttf as sdlttf
 from source import constants as const
 from source.auxiliar import GetTickCount, create_rgb_surface, pause, setupTickCount
 from source.debug import debug_print, set_debug
+from source.configuration import load_configuration
 from source.roadfighter import RoadFighter
 from source.sound import Sound_initialization
 
@@ -223,7 +224,8 @@ def main(argv: list[str]) -> int:
     args = parser.parse_args(argv[1:])
     set_debug(args.debug)
 
-    fullscreen = False
+    cfg = load_configuration()
+    fullscreen = cfg.fullscreen
     start_level = args.start_level
     level_type = args.level_type
     record_replay = args.record_replay
@@ -300,6 +302,11 @@ def main(argv: list[str]) -> int:
         if act_time - time >= const.REDRAWING_PERIOD:
             time = act_time
             running = running and game.cycle()
+
+            if game.request_toggle_fullscreen:
+                fullscreen = toggle_fullscreen(window, fullscreen)
+                game.fullscreen = fullscreen
+                game.request_toggle_fullscreen = False
 
             # Draw to surface (backward compatible)
             game.draw(logical_surface)

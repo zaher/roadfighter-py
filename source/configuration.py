@@ -46,6 +46,7 @@ class Configuration:
     down2_key: int
     game_remake_extras: bool
     fuel_factor: float
+    fullscreen: bool
 
 
 def default_configuration() -> Configuration:
@@ -62,6 +63,7 @@ def default_configuration() -> Configuration:
         down2_key=DEFAULT_DOWN2_KEY,
         game_remake_extras=True,
         fuel_factor=1.0,
+        fullscreen=False,
     )
 
 
@@ -107,6 +109,7 @@ def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
             fire2_key=get_key("fire2"),
             game_remake_extras=game_section.getboolean("remake_extras"),
             fuel_factor=game_section.getfloat("fuel_factor", fallback=1.0),
+            fullscreen=game_section.getboolean("fullscreen", fallback=False),
         )
     except (KeyError, ValueError):
         cfg = default_configuration()
@@ -133,6 +136,7 @@ def save_configuration(cfg: Configuration, filename: str = "RoadFighter.cfg") ->
     config["Game"] = {
         "remake_extras": "yes" if cfg.game_remake_extras else "no",
         "fuel_factor": str(cfg.fuel_factor),
+        "fullscreen": "yes" if cfg.fullscreen else "no",
     }
 
     with f1open(filename, "w", FileType.USERDATA) as handle:
