@@ -49,8 +49,10 @@ from .sound import (
     Sound_create_music,
     Sound_create_sound,
     Sound_delete_sound,
+    Sound_halt_channel,
     Sound_music_volume,
     Sound_play,
+    Sound_play_continuous,
 )
 from .tile import CTile, TILE_SOURCE
 
@@ -147,6 +149,8 @@ class CGame:
         self.S_truck = None
         self.S_carengine = None
         self.S_carskid = None
+        self.S_horn = None
+        self.horn_channel = -1
 
         self.background = List[CObject]()
         self.middleground = List[CObject]()
@@ -231,6 +235,9 @@ class CGame:
             if surface is not None:
                 sdl2.SDL_FreeSurface(surface)
                 setattr(self, surface_name, None)
+        if self.horn_channel >= 0:
+            Sound_halt_channel(self.horn_channel)
+            self.horn_channel = -1
         for sound_name in (
             "S_takefuel",
             "S_redlight",
@@ -244,6 +251,7 @@ class CGame:
             "S_water",
             "S_collision",
             "S_truck",
+            "S_horn",
         ):
             sound = getattr(self, sound_name)
             if sound is not None:
@@ -347,6 +355,7 @@ class CGame:
         self.S_water = Sound_create_sound("sound/water")
         self.S_collision = Sound_create_sound("sound/collision")
         self.S_truck = Sound_create_sound("sound/truck")
+        self.S_horn = Sound_create_sound("sound/horn")
 
         self.fastcar_counter = 0
         self.esc_pressed = False
@@ -629,6 +638,17 @@ class CGame:
             self.game_state = 1
             self.game_timmer = FADE_TIME
             self.backspace_pressed = True
+        # Horn: start on SELECT press, stop on release (continuous loop while held)
+        if keyboard.get(const.GLOBAL_SELECT_KEY, False) and not old_keyboard.get(const.GLOBAL_SELECT_KEY, False) and self.game_state == 0:
+            if self.S_horn and self.horn_channel < 0:
+                self.horn_channel = Sound_play_continuous(self.S_horn)
+        if not keyboard.get(const.GLOBAL_SELECT_KEY, False) and old_keyboard.get(const.GLOBAL_SELECT_KEY, False):
+            if self.horn_channel >= 0:
+                Sound_halt_channel(self.horn_channel)
+                self.horn_channel = -1
+        if self.game_state != 0 and self.horn_channel >= 0:
+            Sound_halt_channel(self.horn_channel)
+            self.horn_channel = -1
 
         for collection in (self.background, self.middleground, self.foreground):
             for obj in collection:

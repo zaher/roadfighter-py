@@ -122,3 +122,8 @@ The replay system records all keyboard inputs along with the random seed, allowi
 ## License
 
 This is a remake of the original Road Fighter by Konami. The original code was open-sourced and has been ported to modern Python/SDL.
+
+
+## Resources
+
+[Horn sound](https://cdn.pixabay.com/download/audio/2023/06/11/audio_1777c08c36.mp3?filename=universfield-automobile-horn-153260.mp3)
