@@ -132,7 +132,6 @@ class RoadFighter:
             "        "
         )
         self.credits_sfc = sdlttf.TTF_RenderUTF8_Blended(self.font1, credits_text.encode("utf-8"), credits_color)
-        self.credits2_sfc = sdlttf.TTF_RenderUTF8_Blended(self.font1, credits_text.encode("utf-8"), credits_color)
 
         self.S_menu_move = Sound_create_sound("sound/menu_move")
         self.S_menu_select = Sound_create_sound("sound/menu_select")
@@ -601,9 +600,6 @@ class RoadFighter:
 
     def draw_scrolling_credits(self, screen) -> None:
         factor = max(0.0, min(1.0, float(self.menu_timmer) / const.EFFECT_LENGTH))
-        sdl2.SDL_BlitSurface(self.credits_sfc, None, self.credits2_sfc, None)
-        if self.menu_state in (0, 4):
-            surface_fader(self.credits2_sfc, factor, factor, factor, None)
         self.menu_credits_timmer += 2
         if self.menu_credits_timmer > self.screen_w:
             if self.menu_credits_timmer - self.screen_w > self.credits_sfc.contents.w:
@@ -618,4 +614,4 @@ class RoadFighter:
             start_x2 = 0
         src = self.make_rect(start_x, 0, self.credits_sfc.contents.w - start_x, self.credits_sfc.contents.h)
         dst = self.make_rect(start_x2, self.screen_h - self.credits_sfc.contents.h, src.w, src.h)
-        sdl2.SDL_BlitSurface(self.credits2_sfc, src, screen, dst)
+        sdl2.SDL_BlitSurface(self.credits_sfc, src, screen, dst)
