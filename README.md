@@ -1,15 +1,16 @@
 ## Road Fighter
 
-A game based on the open-source version of [Road Fighter](https://ecsoft2.org/road-fighter), ported to Python 3/SDL using GPT 4.1 by my friend (thanks to my friend for porting it).
+A game based on the open-source version of [Road Fighter](https://ecsoft2.org/road-fighter), initial ported to Python 3/SDL using GPT 4.1 by my friend (thanks to my friend for porting it).
 
 ## Features
 
 - Full-screen support
 - Joystick support for 2 players
 - Configuration saved in INI format
-- Optimized graphics (converted from BMP to PNG)
+- Add Horn sound effect
+- Optimized graphics and convert from BMP to PNG
 - Hidden cursor while playing
-- Replay recording and playback
+- Replay recording and playback by command line
 
 ## Installation
 
@@ -102,6 +103,13 @@ The level number and level type are independent settings. The in-game menu alway
 - **Tab**: Fire / Turbo
 
 Joysticks are automatically detected and mapped to player controls.
+
+### Keys
+
+- **Enter**: Select
+- **Alt + Enter**: Toggle full-screen mode
+- **F12**: Quit the game
+- **Ctrl + P**: Save a screenshot to the userdata screenshots folder
 
 ### Replay System
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime
 import sys
 
 import sdl2
@@ -11,8 +12,27 @@ from source import constants as const
 from source.auxiliar import GetTickCount, create_rgb_surface, pause, setupTickCount
 from source.debug import debug_print, set_debug
 from source.configuration import load_configuration
+from source.filehandling import FileType, mkdirp, resolve_path
 from source.roadfighter import RoadFighter
 from source.sound import Sound_initialization
+
+
+def save_screenshot(surface):
+    """Save the given surface to a timestamped BMP file in the screenshots directory."""
+    screenshots_dir = resolve_path("screenshots", FileType.USERDATA)
+    mkdirp(screenshots_dir)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = screenshots_dir / f"screenshot_{timestamp}.bmp"
+    result = sdl2.SDL_SaveBMP(surface, str(filename).encode("utf-8"))
+    if result == 0:
+        print(f"Screenshot saved: {filename}")
+    else:
+        error = sdl2.SDL_GetError()
+        if error:
+            error_str = error.decode("utf-8", errors="replace")
+        else:
+            error_str = "unknown error"
+        print(f"Failed to save screenshot: {error_str}")
 
 
 def get_controller_index(instance_id: int, controllers: list) -> int:
@@ -240,6 +260,7 @@ def main(argv: list[str]) -> int:
     event = sdl2.SDL_Event()
     time = GetTickCount()
     running = True
+    screenshot_requested = False
 
     while running:
         while sdl2.SDL_PollEvent(event):
@@ -256,6 +277,8 @@ def main(argv: list[str]) -> int:
                     fullscreen = toggle_fullscreen(window, fullscreen)
                 elif sys.platform == "darwin" and key == sdl2.SDLK_f and (modifiers & sdl2.KMOD_GUI):
                     fullscreen = toggle_fullscreen(window, fullscreen)
+                elif key == sdl2.SDLK_p and (modifiers & sdl2.KMOD_CTRL):
+                    screenshot_requested = True
                 if key == const.GLOBAL_QUIT_KEY:
                     running = False
             ## Key Up
@@ -310,6 +333,10 @@ def main(argv: list[str]) -> int:
 
             # Draw to surface (backward compatible)
             game.draw(logical_surface)
+
+            if screenshot_requested:
+                save_screenshot(logical_surface)
+                screenshot_requested = False
 
             # Present via GPU
             present_surface(logical_surface, renderer, screen_texture)
