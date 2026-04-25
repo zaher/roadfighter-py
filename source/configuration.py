@@ -44,7 +44,6 @@ class Configuration:
     fire2_key: int
     up2_key: int
     down2_key: int
-    game_remake_extras: bool
     fuel_factor: float
     fullscreen: bool
 
@@ -61,7 +60,6 @@ def default_configuration() -> Configuration:
         fire2_key=DEFAULT_FIRE2_KEY,
         up2_key=DEFAULT_UP2_KEY,
         down2_key=DEFAULT_DOWN2_KEY,
-        game_remake_extras=True,
         fuel_factor=1.0,
         fullscreen=False,
     )
@@ -107,7 +105,6 @@ def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
             up2_key=get_key("up2"),
             down2_key=get_key("down2"),
             fire2_key=get_key("fire2"),
-            game_remake_extras=game_section.getboolean("remake_extras"),
             fuel_factor=game_section.getfloat("fuel_factor", fallback=1.0),
             fullscreen=game_section.getboolean("fullscreen", fallback=False),
         )
@@ -134,7 +131,6 @@ def save_configuration(cfg: Configuration, filename: str = "RoadFighter.cfg") ->
     }
 
     config["Game"] = {
-        "remake_extras": "yes" if cfg.game_remake_extras else "no",
         "fuel_factor": str(cfg.fuel_factor),
         "fullscreen": "yes" if cfg.fullscreen else "no",
     }

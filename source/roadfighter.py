@@ -128,6 +128,7 @@ class RoadFighter:
             "GRAPHICS: Miikka Poikela (McBain)    "
             "MUSIC/SFX: Jorrith Schaap (Jorito)    "
             "BETA TESTING: Jason Eames (JEames), Miikka Poikela (McBain), Jorrith Schaap (Jorito), Santi Ontanon (Brain)"
+            "Ported to Python using AI: Zaher Dirkey (Zaher) and his friend"
             "        "
         )
         self.credits_sfc = sdlttf.TTF_RenderUTF8_Blended(self.font1, credits_text.encode("utf-8"), credits_color)
@@ -151,7 +152,6 @@ class RoadFighter:
         self.down2_key = cfg.down2_key
         self.fire2_key = cfg.fire2_key
 
-        self.game_remake_extras = cfg.game_remake_extras
         self.fuel_factor = cfg.fuel_factor
         self.fullscreen = cfg.fullscreen
         self.request_toggle_fullscreen = False
@@ -399,10 +399,9 @@ class RoadFighter:
             self.menu_nitems = 4
         elif self.menu_current_menu == 1:
             self.menu_tittle_text = "OPTIONS:"
-            extras = "ON" if self.game_remake_extras else "OFF"
             fs = "ON" if self.fullscreen else "OFF"
-            self.menu_options_text = f"PLAYER 1 KEYS\nPLAYER 2 KEYS\nEXTRAS: {extras}\nFULL SCREEN: {fs}\nDEFAULT\nBACK\n"
-            self.menu_nitems = 6
+            self.menu_options_text = f"PLAYER 1 KEYS\nPLAYER 2 KEYS\nFULL SCREEN: {fs}\nDEFAULT\nBACK\n"
+            self.menu_nitems = 5
         elif self.menu_current_menu == 2:
             self.menu_tittle_text = "PLAYER 1:"
             self.menu_options_text = (
@@ -461,7 +460,7 @@ class RoadFighter:
                 self.menu_state = 1
                 self.menu_timmer = 0
                 self.menu_current_menu = 3
-            elif self.menu_item == 5:
+            elif self.menu_item == 4:
                 self.menu_state = 1
                 self.menu_timmer = 0
                 self.menu_current_menu = 0
@@ -497,7 +496,6 @@ class RoadFighter:
                 up2_key=self.up2_key,
                 down2_key=self.down2_key,
                 fire2_key=self.fire2_key,
-                game_remake_extras=self.game_remake_extras,
                 fuel_factor=self.fuel_factor,
                 fullscreen=self.fullscreen,
             )

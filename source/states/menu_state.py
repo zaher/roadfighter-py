@@ -74,11 +74,9 @@ def menu_cycle(roadfighter) -> int:
                     roadfighter.menu_timmer = const.TEXT_EFFECT_LENGTH
                 elif roadfighter.menu_current_menu == 1:
                     if roadfighter.menu_item == 2:
-                        roadfighter.game_remake_extras = not roadfighter.game_remake_extras
-                    if roadfighter.menu_item == 3:
                         roadfighter.fullscreen = not roadfighter.fullscreen
                         roadfighter.request_toggle_fullscreen = True
-                    if roadfighter.menu_item == 4:
+                    if roadfighter.menu_item == 3:
                         cfg = default_configuration()
                         roadfighter.left_key = cfg.left_key
                         roadfighter.right_key = cfg.right_key
@@ -86,11 +84,10 @@ def menu_cycle(roadfighter) -> int:
                         roadfighter.left2_key = cfg.left2_key
                         roadfighter.right2_key = cfg.right2_key
                         roadfighter.fire2_key = cfg.fire2_key
-                        roadfighter.game_remake_extras = cfg.game_remake_extras
                         roadfighter.fuel_factor = cfg.fuel_factor
                         roadfighter.fullscreen = cfg.fullscreen
                         roadfighter.request_toggle_fullscreen = True
-                    if roadfighter.menu_item in (0, 1, 5):
+                    if roadfighter.menu_item in (0, 1, 4):
                         roadfighter.menu_state = 3
                         roadfighter.menu_timmer = const.TEXT_EFFECT_LENGTH
                 elif roadfighter.menu_current_menu == 2:
