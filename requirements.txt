@@ -8,3 +8,7 @@ pysdl2>=0.9.12
 # Provides: SDL2, SDL2_image, SDL2_mixer, SDL2_ttf binaries
 # Used for: image loading (IMG_Load), sound (Mix_PlayMusic), fonts (TTF_Init)
 pysdl2-dll>=2.26.0
+
+# Numpy - Numerical computing library
+# Used for: high-performance array operations and mathematical functions
+numpy>=1.24.0
