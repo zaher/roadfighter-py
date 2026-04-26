@@ -16,7 +16,7 @@ from .constants import (
     DEFAULT_DOWN_KEY,
     DEFAULT_DOWN2_KEY,
 )
-from .filehandling import FileType, f1open
+from .filehandling import FileType, f1open, resolve_path
 
 
 def keycode_to_name(keycode: int) -> str:
@@ -68,10 +68,11 @@ def default_configuration() -> Configuration:
 def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
     config = configparser.ConfigParser()
 
-    try:
-        with f1open(filename, "r", FileType.USERDATA) as handle:
-            config.read_file(handle)
-    except (FileNotFoundError, configparser.Error):
+    default_path = resolve_path(filename, FileType.GAMEDATA)
+    user_path = resolve_path(filename, FileType.USERDATA)
+    read_files = config.read([default_path, user_path])
+
+    if not read_files:
         cfg = default_configuration()
         save_configuration(cfg, filename)
         return cfg
@@ -93,7 +94,7 @@ def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
                     raise ValueError(f"Unknown key name: {value}")
                 return keycode
 
-        return Configuration(
+        cfg = Configuration(
             left_key=get_key("left"),
             right_key=get_key("right"),
             up_key=get_key("up"),
@@ -113,6 +114,12 @@ def load_configuration(filename: str = "RoadFighter.cfg") -> Configuration:
         save_configuration(cfg, filename)
         return cfg
 
+    # If no user config exists yet, save the loaded configuration (defaults from root or hardcoded)
+    if str(user_path) not in read_files:
+        save_configuration(cfg, filename)
+
+    return cfg
+
 
 def save_configuration(cfg: Configuration, filename: str = "RoadFighter.cfg") -> None:
     config = configparser.ConfigParser()
@@ -131,7 +138,6 @@ def save_configuration(cfg: Configuration, filename: str = "RoadFighter.cfg") ->
     }
 
     config["Game"] = {
-        "fuel_factor": str(cfg.fuel_factor),
         "fullscreen": "yes" if cfg.fullscreen else "no",
     }
 

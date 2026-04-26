@@ -1,26 +1,31 @@
 ## Road Fighter
 
-A game based on the open-source version of [Road Fighter](https://ecsoft2.org/road-fighter), initial ported to Python 3/SDL using GPT 4.1 by my friend (thanks to my friend for porting it).
+A game based on the open-source version of [Road Fighter](https://ecsoft2.org/road-fighter), initially ported to Python 3/SDL using GPT-4.1 by my friend (thanks to my friend for porting it).
 
 ## Features
 
+Features added after porting to Python
+
 - Full-screen support
-- Joystick support for 2 players
+- Joystick support for 2 players (auto-detect)
 - Configuration saved in INI format
 - Add Horn sound effect
 - Optimized graphics and convert from BMP to PNG
 - Hidden cursor while playing
-- Replay recording and playback by command line
+- Sparkles when crash
+- Any player who starts a single game takes control
+- Save screenshot Ctrl+P (C:\Users\%username%\.roadfighter\)
 
 ## Installation
 
 This bundle is self-contained. It uses local copies of:
 
-- `roadfighter/` - Game source code
+- `source/` - Game source code
 - `graphics/` - Game graphics (PNG format)
 - `sound/` - Sound effects and music
 - `maps/` - Level maps
 - `fonts/` - Game fonts
+- `controller/` - Joystick button mappings
 
 ## Usage
 
@@ -129,13 +134,14 @@ The replay system records all keyboard inputs along with the random seed, allowi
 
 ## License
 
-This is a remake of the original Road Fighter by Konami. The original code was open-sourced and has been ported to modern Python/SDL.
+GNU General Public License (GPL)
 
+This is a remake of the original Road Fighter by Konami. The original code was open-sourced and has been ported to modern Python/SDL.
 
 ## Done
 
 - Joystick & GameController support (2 players, auto-detect, custom mappings via `gamecontrollerdb.txt`)
-- Keyboard + joystick active by default from first run
+- Keyboard and joystick are active by default from the first run
 - Configuration & key bindings saved in INI format (human-readable key names)
 - Menu improvements: glowing selected item, arrow positioning, full-screen toggle, removed redundant Extras option
 - Graphics optimizations: converted BMP to PNG, SDL2-based rotation/scaling, shader effects, glowing text, hidden cursor during race
