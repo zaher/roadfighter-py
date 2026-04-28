@@ -18,6 +18,8 @@ Features added after porting to Python
 
 ## Installation
 
+Run `install.cmd`
+
 This bundle is self-contained. It uses local copies of:
 
 - `source/` - Game source code
@@ -25,7 +27,8 @@ This bundle is self-contained. It uses local copies of:
 - `sound/` - Sound effects and music
 - `maps/` - Level maps
 - `fonts/` - Game fonts
-- `controller/` - Joystick button mappings
+- `controller/` - Joystick buttons mappings
+- `sdl2` - Where sdl2 dlls, if not exist python will take it from python library
 
 ## Usage
 
@@ -33,6 +36,10 @@ Run the game from the project directory:
 
 ```bash
 python main.py
+or
+py main.py
+or
+pythonw main.py
 ```
 
 ### Command-Line Arguments
@@ -60,6 +67,7 @@ options:
   --load-replay         Load and play back a previously recorded replay from
                         replay.txt. The game will run automatically using the
                         recorded inputs.
+  --debug               Show some debug messages (like joysticks detected)
 ```
 
 ### Examples
@@ -100,12 +108,12 @@ The level number and level type are independent settings. The in-game menu alway
 ### Controls
 
 #### Player 1 (Default)
-- **Arrow Keys**: Move car
-- **Space**: Fire / Turbo
+- **Arrow Keys**: Left or Right Steering
+- **Space**: Accelerator
 
 #### Player 2 (Default)
-- **WASD**: Move car
-- **Tab**: Fire / Turbo
+- **WASD**: Left or Right Steering
+- **Left Shift**: Accelerator
 
 Joysticks are automatically detected and mapped to player controls.
 
