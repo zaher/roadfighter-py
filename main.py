@@ -24,12 +24,12 @@ from source.sound import Sound_initialization
 
 
 def save_screenshot(surface):
-    """Save the given surface to a timestamped BMP file in the screenshots directory."""
+    """Save the given surface to a timestamped PNG file in the screenshots directory."""
     screenshots_dir = resolve_path("screenshots", FileType.USERDATA)
     mkdirp(screenshots_dir)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = screenshots_dir / f"screenshot_{timestamp}.bmp"
-    result = sdl2.SDL_SaveBMP(surface, str(filename).encode("utf-8"))
+    filename = screenshots_dir / f"screenshot_{timestamp}.png"
+    result = sdlimage.IMG_SavePNG(surface, str(filename).encode("utf-8"))
     if result == 0:
         print(f"Screenshot saved: {filename}")
     else:
