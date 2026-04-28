@@ -122,6 +122,11 @@ def initialize_sdl(fullscreen: bool, debug: bool = False):
     if not window:
         raise RuntimeError("SDL_CreateWindow failed")
 
+    icon = sdlimage.IMG_Load(b"roadfighter.ico")
+    if icon:
+        sdl2.SDL_SetWindowIcon(window, icon)
+        sdl2.SDL_FreeSurface(icon)
+
     # Create hardware-accelerated renderer
     renderer = sdl2.SDL_CreateRenderer(
         window,

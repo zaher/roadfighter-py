@@ -29,7 +29,8 @@ else:
     PROJECT_ROOT = LEGACY_ROOT
 USERDATA_DIR = Path(os.environ.get("ROADFIGHTER_USERDATA_DIR", Path.home() / ".roadfighter"))
 
-APPLICATION_NAME = "Road Fighter v1.0"
+VERSION = "v1.4"
+APPLICATION_NAME = "Road Fighter"
 GAMENAME = "roadfighter"
 
 SCREEN_X = 512
