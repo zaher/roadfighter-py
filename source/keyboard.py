@@ -93,23 +93,19 @@ class KeyboardState:
             if button == sdl2.SDL_CONTROLLER_BUTTON_A or button == 0:
                 self._pressed[JOY_FIRE] = pressed
             elif button == sdl2.SDL_CONTROLLER_BUTTON_B or button == 1:
-                #self._pressed[JOY_BREAK] = pressed
                 self._pressed[JOY_SELECT] = pressed
             # Also support START/BACK buttons on controllers
             elif button == sdl2.SDL_CONTROLLER_BUTTON_START:
-                self._pressed[JOY_SELECT] = pressed
+                self._pressed[JOY_ESCAPE] = pressed
+                self._pressed[GLOBAL_ESCAPE_KEY] = pressed
         else:
             if button == sdl2.SDL_CONTROLLER_BUTTON_A or button == 0:
                 self._pressed[JOY2_FIRE] = pressed
             elif button == sdl2.SDL_CONTROLLER_BUTTON_B or button == 1:
-                #self._pressed[JOY2_BREAK] = pressed
                 self._pressed[JOY2_SELECT] = pressed
-            elif button == sdl2.SDL_CONTROLLER_BUTTON_BACK:
+            elif button == sdl2.SDL_CONTROLLER_BUTTON_START:
                 self._pressed[JOY2_ESCAPE] = pressed
                 self._pressed[GLOBAL_ESCAPE_KEY] = pressed
-            elif button == sdl2.SDL_CONTROLLER_BUTTON_START:
-                self._pressed[JOY2_SELECT] = pressed
-                self._pressed[GLOBAL_SELECT_KEY] = pressed
 
     def set_joy_hat(self, which: int, hat: int, value: int) -> None:
         """Handle joystick hat/d-pad motion.
