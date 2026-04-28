@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import os
 import sys
+
+# Use SDL2 DLLs from local bin folder
+os.environ["PYSDL2_DLL_PATH"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bin")
 
 import sdl2
 import sdl2.sdlimage as sdlimage

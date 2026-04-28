@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 import math
+import os
 import time
 from ctypes import byref
+
+# Use SDL2 DLLs from local bin folder (if not already set by main.py)
+if "PYSDL2_DLL_PATH" not in os.environ:
+    os.environ["PYSDL2_DLL_PATH"] = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bin")
 
 import sdl2
 import sdl2.ext
