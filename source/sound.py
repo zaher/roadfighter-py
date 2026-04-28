@@ -5,9 +5,11 @@ import os
 from pathlib import Path
 from typing import Optional
 
-# Use SDL2 DLLs from local bin folder (if not already set by main.py)
+# Use SDL2 DLLs from local sdl2 folder if it exists and not already set
 if "PYSDL2_DLL_PATH" not in os.environ:
-    os.environ["PYSDL2_DLL_PATH"] = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bin")
+    _sdl2_dll_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sdl2")
+    if os.path.isdir(_sdl2_dll_path):
+        os.environ["PYSDL2_DLL_PATH"] = _sdl2_dll_path
 
 from sdl2 import SDL_GetCurrentAudioDriver
 from sdl2.audio import AUDIO_S16

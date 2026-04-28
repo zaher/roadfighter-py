@@ -5,8 +5,10 @@ import datetime
 import os
 import sys
 
-# Use SDL2 DLLs from local bin folder
-os.environ["PYSDL2_DLL_PATH"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bin")
+# Use SDL2 DLLs from local sdl2 folder if it exists, otherwise use default
+_sdl2_dll_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sdl2")
+if os.path.isdir(_sdl2_dll_path):
+    os.environ["PYSDL2_DLL_PATH"] = _sdl2_dll_path
 
 import sdl2
 import sdl2.sdlimage as sdlimage
