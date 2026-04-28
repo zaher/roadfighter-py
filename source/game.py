@@ -108,6 +108,7 @@ class CGame:
     ) -> None:
         self.dx = 0
         self.dy = 0
+        self._part_size = 1  # Pre-computed part_size for quick table lookups
         self.game_state = 0
         self.game_timmer = 0
         self.game_mode = mode
@@ -399,14 +400,14 @@ class CGame:
         return completed
 
     def init_quick_tables(self) -> None:
-        part_size = max(1, self.dy // QUICK_PARTS)
+        # _part_size is pre-computed when dy is set in load_map
         for collection, quick in (
             (self.background, self.quick_background),
             (self.middleground, self.quick_middleground),
             (self.foreground, self.quick_foreground),
         ):
             for obj in collection:
-                index = obj.get_y() // part_size
+                index = obj.get_y() // self._part_size
                 index = max(0, min(QUICK_PARTS - 1, index))
                 quick[index].Add(obj)
 
@@ -417,9 +418,9 @@ class CGame:
             self.quick_foreground[index].Delete()
 
     def get_quick_min_max(self, ymin: int, ymax: int) -> tuple[int, int]:
-        part_size = max(1, self.dy // QUICK_PARTS)
-        minimum = ((ymin - BIGGEST_OBJECT) // part_size) - 1
-        maximum = ymax // part_size
+        # _part_size is pre-computed when dy is set in load_map
+        minimum = ((ymin - BIGGEST_OBJECT) // self._part_size) - 1
+        maximum = ymax // self._part_size
         minimum = max(0, min(QUICK_PARTS - 1, minimum))
         maximum = max(0, min(QUICK_PARTS - 1, maximum))
         return minimum, maximum
@@ -537,6 +538,7 @@ class CGame:
         scanner.next()
         self.dx = scanner.int() * 16
         self.dy = scanner.int() * 16
+        self._part_size = max(1, self.dy // QUICK_PARTS)
         scanner.int()
 
         n_background = scanner.int()

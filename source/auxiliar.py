@@ -195,6 +195,15 @@ def surface_fader(surface, r_factor: float, g_factor: float, b_factor: float, re
         if overlay is None:
             overlay = create_rgb_surface(rect.w, rect.h)
             sdl2.SDL_SetSurfaceBlendMode(overlay, sdl2.SDL_BLENDMODE_BLEND)
+            # LRU eviction - remove oldest entry if cache is full
+            if len(_fade_overlay_cache) >= 50:
+                oldest_key = next(iter(_fade_overlay_cache))
+                old_overlay = _fade_overlay_cache.pop(oldest_key)
+                sdl2.SDL_FreeSurface(old_overlay)
+            _fade_overlay_cache[key] = overlay
+        else:
+            # Move to end to mark as recently used (LRU)
+            del _fade_overlay_cache[key]
             _fade_overlay_cache[key] = overlay
         sdl2.SDL_FillRect(overlay, None, sdl2.SDL_MapRGBA(overlay.contents.format, 0, 0, 0, alpha))
         dst = SDL_Rect(rect.x, rect.y, rect.w, rect.h)

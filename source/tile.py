@@ -49,15 +49,30 @@ class CollisionMap:
                 self.mask[y][x] = a.value != 0
 
     def collides_with(self, other: "CollisionMap", offset_x: int, offset_y: int) -> bool:
+        # Fast bounding box rejection first
+        # self is at (0,0), other is at (offset_x, offset_y)
+        if offset_x >= self.width or offset_x + other.width <= 0:
+            return False
+        if offset_y >= self.height or offset_y + other.height <= 0:
+            return False
+        # Compute overlap region
         start_x = max(0, offset_x)
         start_y = max(0, offset_y)
         end_x = min(self.width, offset_x + other.width)
         end_y = min(self.height, offset_y + other.height)
         if start_x >= end_x or start_y >= end_y:
             return False
+        # Pixel-perfect collision check on overlapping region
+        # Use local variables for faster attribute access
+        self_mask = self.mask
+        other_mask = other.mask
+        oy = offset_y
+        ox = offset_x
         for y in range(start_y, end_y):
+            self_row = self_mask[y]
+            other_row = other_mask[y - oy]
             for x in range(start_x, end_x):
-                if self.mask[y][x] and other.mask[y - offset_y][x - offset_x]:
+                if self_row[x] and other_row[x - ox]:
                     return True
         return False
 
@@ -124,9 +139,15 @@ class CTile:
         if cached is None:
             cached = sdl2.SDL_ConvertSurfaceFormat(self.orig, sdl2.SDL_PIXELFORMAT_ARGB8888, 0)
             surface_shader(cached, float(factor) / 100.0, red, green, blue, alpha)
-            # Limit cache size to prevent memory bloat
+            # LRU eviction - remove oldest entry if cache is full
             if len(_shader_cache) >= 100:
-                _shader_cache.clear()
+                oldest_key = next(iter(_shader_cache))
+                old_sfc = _shader_cache.pop(oldest_key)
+                sdl2.SDL_FreeSurface(old_sfc)
+            _shader_cache[cache_key] = cached
+        else:
+            # Move to end to mark as recently used (LRU)
+            del _shader_cache[cache_key]
             _shader_cache[cache_key] = cached
         rect = SDL_Rect(x, y, self.r.w, self.r.h)
         sdl2.SDL_BlitSurface(cached, None, dest, byref(rect))
@@ -140,9 +161,15 @@ class CTile:
         if cached is None:
             cached = sdl2.SDL_ConvertSurfaceFormat(self.orig, sdl2.SDL_PIXELFORMAT_ARGB8888, 0)
             surface_bicolor(cached, float(factor) / 100.0, r1, g1, b1, a1, r2, g2, b2, a2)
-            # Limit cache size to prevent memory bloat
+            # LRU eviction - remove oldest entry if cache is full
             if len(_bicolor_cache) >= 100:
-                _bicolor_cache.clear()
+                oldest_key = next(iter(_bicolor_cache))
+                old_sfc = _bicolor_cache.pop(oldest_key)
+                sdl2.SDL_FreeSurface(old_sfc)
+            _bicolor_cache[cache_key] = cached
+        else:
+            # Move to end to mark as recently used (LRU)
+            del _bicolor_cache[cache_key]
             _bicolor_cache[cache_key] = cached
         rect = SDL_Rect(x, y, self.r.w, self.r.h)
         sdl2.SDL_BlitSurface(cached, None, dest, byref(rect))

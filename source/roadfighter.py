@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import OrderedDict
 from ctypes import byref
 
 import sdl2
@@ -268,11 +269,15 @@ class RoadFighter:
             for row in range(height - 1, -1, -2):
                 rect = sdl2.SDL_Rect(0, row, width, 1)
                 sdl2.SDL_FillRect(sfc, rect, mapped)
+            # Use LRU eviction - remove oldest entry if cache is full
             if len(self._bar_surface_cache) >= 100:
-                keys = list(self._bar_surface_cache.keys())
-                for k in keys[:50]:
-                    old = self._bar_surface_cache.pop(k)
-                    sdl2.SDL_FreeSurface(old)
+                oldest_key = next(iter(self._bar_surface_cache))
+                old = self._bar_surface_cache.pop(oldest_key)
+                sdl2.SDL_FreeSurface(old)
+            self._bar_surface_cache[key] = sfc
+        else:
+            # Move to end to mark as recently used (LRU)
+            del self._bar_surface_cache[key]
             self._bar_surface_cache[key] = sfc
         return sfc
 
@@ -343,11 +348,15 @@ class RoadFighter:
         sfc = self._score_surface_cache.get(key)
         if sfc is None:
             sfc = sdlttf.TTF_RenderUTF8_Blended(self.font1, text.encode("utf-8"), sdl2.SDL_Color(*color, 255))
+            # Use LRU eviction - remove oldest entry if cache is full
             if len(self._score_surface_cache) >= 200:
-                keys = list(self._score_surface_cache.keys())
-                for k in keys[:100]:
-                    old = self._score_surface_cache.pop(k)
-                    sdl2.SDL_FreeSurface(old)
+                oldest_key = next(iter(self._score_surface_cache))
+                old = self._score_surface_cache.pop(oldest_key)
+                sdl2.SDL_FreeSurface(old)
+            self._score_surface_cache[key] = sfc
+        else:
+            # Move to end to mark as recently used (LRU)
+            del self._score_surface_cache[key]
             self._score_surface_cache[key] = sfc
         rect = self.make_rect(x - sfc.contents.w, y, sfc.contents.w, sfc.contents.h)
         sdl2.SDL_BlitSurface(sfc, None, screen, rect)
@@ -565,12 +574,12 @@ class RoadFighter:
                 y_inc = 4 + const.FONT_SIZE
                 y_start = 10
             cached = (title_surface, options_surface, y_inc, y_start)
+            # Use LRU eviction - remove oldest entry if cache is full
             if len(self._menu_surface_cache) >= 20:
-                keys = list(self._menu_surface_cache.keys())
-                for k in keys[:10]:
-                    old = self._menu_surface_cache.pop(k)
-                    sdl2.SDL_FreeSurface(old[0])
-                    sdl2.SDL_FreeSurface(old[1])
+                oldest_key = next(iter(self._menu_surface_cache))
+                old = self._menu_surface_cache.pop(oldest_key)
+                sdl2.SDL_FreeSurface(old[0])
+                sdl2.SDL_FreeSurface(old[1])
             self._menu_surface_cache[cache_key] = cached
         title_surface, options_surface, y_inc, y_start = cached
 

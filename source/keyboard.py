@@ -24,26 +24,30 @@ class KeyboardState:
         self._pressed[keycode] = pressed
 
     def __getitem__(self, keycode: int) -> bool:
-        # Check if the key is directly pressed
-        if self._pressed.get(keycode, False):
+        # Fast path: direct key press check
+        pressed = self._pressed.get(keycode)
+        if pressed:
             return True
         # Check if any mapped joystick key is pressed
         joy_keys = self._joy_mapping.get(keycode)
         if joy_keys:
+            pressed_dict = self._pressed
             for joy_key in joy_keys:
-                if self._pressed.get(joy_key, False):
+                if pressed_dict.get(joy_key):
                     return True
         return False
 
     def get(self, keycode: int, default: bool = False) -> bool:
-        # Check physical key first
-        if self._pressed.get(keycode, False):
+        # Fast path: direct key press check
+        pressed = self._pressed.get(keycode)
+        if pressed:
             return True
         # Check if any mapped joystick key is pressed
         joy_keys = self._joy_mapping.get(keycode)
         if joy_keys:
+            pressed_dict = self._pressed
             for joy_key in joy_keys:
-                if self._pressed.get(joy_key, False):
+                if pressed_dict.get(joy_key):
                     return True
         return default
 
@@ -54,11 +58,20 @@ class KeyboardState:
         return clone
 
     def newly_pressed(self, other: "KeyboardState") -> list[int]:
-        return [key for key, pressed in self._pressed.items() if pressed and not other[key]]
+        # Optimized: use local variables for faster access
+        self_pressed = self._pressed
+        return [key for key, pressed in self_pressed.items() if pressed and not other._pressed.get(key)]
 
     def changed_keys(self, other: "KeyboardState") -> list[int]:
-        keys = set(self._pressed) | set(other._pressed)
-        return [key for key in keys if self[key] != other[key]]
+        # Optimized: compare directly without going through __getitem__
+        self_pressed = self._pressed
+        other_pressed = other._pressed
+        keys = set(self_pressed) | set(other_pressed)
+        result = []
+        for key in keys:
+            if bool(self_pressed.get(key)) != bool(other_pressed.get(key)):
+                result.append(key)
+        return result
 
     def set_joy_axis(self, which: int, axis: int, value: int) -> None:
         if which == 0:

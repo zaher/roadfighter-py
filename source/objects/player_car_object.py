@@ -63,6 +63,8 @@ class CPlayerCarObject(CCarObject):
         super().__init__(x, y, None, game)
         self.tiles = [tiles[index] for index in range(first_tile, last_tile + 1)]
         self.ntiles = len(self.tiles)
+        # Pre-compute tiles minus explosion for car_tile calculation
+        self._ntiles_minus_explosion = self.ntiles - EXPLOSION_TILES
         self.tile = self.car_tile(0)
         self.old_angle = 0
         self.rotating_angle = 0
@@ -408,15 +410,15 @@ class CPlayerCarObject(CCarObject):
         # Use pre-computed tile lookup for better performance
         # Normalize angle to 0-359 range
         angle = angle % 360
-        nt = self.ntiles - EXPLOSION_TILES
-        return (angle * nt) // 360
+        # Use pre-computed value instead of calculating ntiles - EXPLOSION_TILES
+        return (angle * self._ntiles_minus_explosion) // 360
 
     def tyre_coordinates(self, angle: int):
         # Use pre-computed tyre coordinates table for better performance
         # Normalize angle to 0-359 range
         angle = angle % 360
-        nt = self.ntiles - EXPLOSION_TILES
-        tmp = angle * nt / 360.0
+        # Use pre-computed value instead of calculating ntiles - EXPLOSION_TILES
+        tmp = angle * self._ntiles_minus_explosion / 360.0
         tile = int(tmp)
         fraction = tmp - tile
         tile2 = (tile + 1) % 8
