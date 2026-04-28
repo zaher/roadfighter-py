@@ -2,7 +2,7 @@
 
 A game based on the open-source version of [Road Fighter](https://ecsoft2.org/road-fighter), initially ported to Python 3/SDL using GPT-4.1 by my friend (thanks to my friend for porting it).
 
-![Alt Text](screenshots/ss2players.png) ![Alt Text](screenshots/ss2players.png)
+![Alt Text](screenshots/screenshot.png)![Alt Text](screenshots/ss2players.png)
 
 ## Features
 
