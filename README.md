@@ -1,8 +1,8 @@
 ## Road Fighter
 
-A game based on the open-source version of [Road Fighter](https://ecsoft2.org/road-fighter), initially ported to Python 3/SDL using GPT-4.1 by my friend (thanks to my friend for porting it).
+A game based on the open-source version of [Road Fighter](https://ecsoft2.org/road-fighter), initially ported to Python 3/SDL2 using GPT-4.1 by my friend (thanks to my friend for porting it).
 
-![Alt Text](screenshots/screenshot.png)![Alt Text](screenshots/ss2players.png)
+![screenshot1](screenshots/screenshot.png)![screenshot2](screenshots/ss2players.png)
 
 ## Features
 
@@ -30,7 +30,7 @@ This bundle is self-contained. It uses local copies of:
 - `maps/` - Level maps
 - `fonts/` - Game fonts
 - `controller/` - Joystick buttons mappings
-- `sdl2` - Where sdl2 dlls, if not exist python will take it from python library
+- `sdl2/` - Where sdl2 dlls, if not exist python will take it from python library
 
 ## Usage
 
@@ -38,9 +38,13 @@ Run the game from the project directory:
 
 ```bash
 python main.py
+
 or
+
 py main.py
+
 or
+
 pythonw main.py
 ```
 
